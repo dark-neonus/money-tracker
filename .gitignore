@@ -1,0 +1,12 @@
+# Files to ignore
+gui_testing_1.py
+tracker_logic_test.py
+
+
+# Ignore all .json files
+*.json
+
+# Ignore folders
+.vscode/
+__pycache__/
+tracker-env/
