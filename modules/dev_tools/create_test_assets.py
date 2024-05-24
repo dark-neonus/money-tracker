@@ -1,4 +1,5 @@
-from tracker_logic import *
+from modules.tracker_logic.classes import *
+from modules.tracker_logic.general_functions import nice_dict_
 import json
 
 tag1  = Tag("Car", "Money spent on car repairment, fuel and other needs", "#tg001")

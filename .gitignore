@@ -1,7 +1,6 @@
 # Files to ignore
 gui_testing_1.py
-tracker_logic_test.py
-
+gui-tmp-plan.jpg
 
 # Ignore all .json files
 *.json
@@ -10,3 +9,4 @@ tracker_logic_test.py
 .vscode/
 __pycache__/
 tracker-env/
+jsons/
