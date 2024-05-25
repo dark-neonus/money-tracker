@@ -32,9 +32,13 @@ class TrackerObject(metaclass=abc.ABCMeta):
     def __dict__(self) -> dict:
         pass
 
+    @abc.abstractmethod
+    def from_dict(self, dict_) -> None:
+        pass
+
     @staticmethod
     @abc.abstractmethod
-    def from_dict(dictionary) -> 'TrackerObject':
+    def create_from_dict(dict_) -> 'TrackerObject':
         pass
 
     def save(self, path: os.path) -> None:
@@ -66,8 +70,13 @@ class Tag(TrackerObject):
             "id": self.id
         }
 
+    def from_dict(self, dict_) -> None:
+        self.name = dict_["name"]
+        self.description = dict_["description"]
+        self.id = dict_["id"]
+
     @staticmethod
-    def from_dict(dict_) -> 'Tag':
+    def create_from_dict(dict_) -> 'Tag':
         return Tag(
             dict_["name"],
             dict_["description"],
@@ -79,8 +88,6 @@ class Tag(TrackerObject):
         new_tag = Tag("", "", "")
         new_tag.load(path)
         return new_tag
-
-
 
 
 class TagList():
@@ -114,11 +121,15 @@ class TagList():
             tmp[tag.id] = tag.__dict__()
         return tmp
 
+    def from_dict(self, dict_) -> None:
+        for tag_dict in dict_.values():
+            self.add_tag(Tag.create_from_dict(tag_dict))
+
     @staticmethod
     def from_dict(dict_: dict) -> 'TagList':
         tmp = TagList([])
         for tag_dict in dict_.values():
-            tmp.add_tag(Tag.from_dict(tag_dict))
+            tmp.add_tag(Tag.create_from_dict(tag_dict))
         return tmp
 
 
@@ -149,8 +160,15 @@ class Transaction(TrackerObject):
             "tags_id": self.tags_id,
         }
 
+    def from_dict(self, dict_) -> None:
+        self.name = dict_["name"]
+        self.description = dict_["description"]
+        self.id = dict_["id"]
+        self.balance = dict_["balance"]
+        self.tags_id = dict_["tags_id"]
+
     @staticmethod
-    def from_dict(dict_) -> 'Transaction':
+    def create_from_dict(dict_) -> 'Transaction':
         return Transaction(
             dict_["name"],
             dict_["description"],
@@ -165,6 +183,8 @@ class Transaction(TrackerObject):
         new_transaction.load(path)
         return new_transaction
 
+    def __str__(self) -> str:
+        return f"[ {self.balance} ] {self.name}"
 
 class Journal(TrackerObject):
     def __init__(
@@ -215,14 +235,22 @@ class Journal(TrackerObject):
             "transaction_list": [transaction.__dict__() for transaction in self.transaction_list],
         }
 
+    def from_dict(self, dict_) -> None:
+        self.name = dict_["name"]
+        self.description = dict_["description"]
+        self.id = dict_["id"]
+        self.tag_list = TagList.from_dict(dict_["tag_list"])
+        self.transaction_list = [Transaction.create_from_dict(tr_dict)
+                                 for tr_dict in dict_["transaction_list"]]
+
     @staticmethod
-    def from_dict(dict_: dict) -> 'Journal':
+    def create_from_dict(dict_: dict) -> 'Journal':
         return Journal(
             dict_["name"],
             dict_["description"],
             dict_["id"],
             TagList.from_dict(dict_["tag_list"]),
-            [Transaction.from_dict(tr_dict)
+            [Transaction.create_from_dict(tr_dict)
              for tr_dict in dict_["transaction_list"]]
         )
 

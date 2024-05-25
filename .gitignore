@@ -10,3 +10,4 @@ gui-tmp-plan.jpg
 __pycache__/
 tracker-env/
 jsons/
+data/

@@ -2,9 +2,7 @@ if __name__ == "__main__":
     import sys
     import os.path
 
-    print(sys.path[0])
     sys.path[0] = os.path.join(sys.path[0], "..", "..")
-    print(sys.path[0])
 
 from modules.tracker_logic.classes import *
 from modules.tracker_logic.general_functions import nice_dict_

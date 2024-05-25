@@ -21,7 +21,7 @@ with open("test-journal.json", "w") as file:
     json.dump(journal.__dict__(), file, indent="\t")
     
 with open("test-journal.json", "r") as file:
-    journal1 = Journal.from_dict(json.load(file))
+    journal1 = Journal.create_from_dict(json.load(file))
     
     
 print("\nLoaded:")

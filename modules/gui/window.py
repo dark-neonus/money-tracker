@@ -1,7 +1,14 @@
+if __name__ == "__main__":
+    import sys
+    import os.path
+
+    sys.path[0] = os.path.join(sys.path[0], "..", "..")
+
 from modules.gui.basic_elements import GUIFrame, GUIButton
 from modules.gui.label_and_entry import GUILabelAndEntry
 from modules.gui.listbox import GUIListBox
 from modules.gui.list_to_list import GUIListToList
+from modules.tracker_logic.classes import Transaction
 
 import tkinter as tk
 from tkinter import ttk
@@ -40,7 +47,7 @@ def create_window(title: str, width: int, height: int, min_width: int = None, mi
     return window
 
 
-class GUIApplication:
+class GUI:
     def __init__(self) -> None:
 
         # Root init
@@ -64,14 +71,14 @@ class GUIApplication:
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
+        self.fv_delete_selected_transaction = lambda: None
+        self.fv_create_transaction = lambda: None
+
+        self.fv_delete_selected_tag = lambda: None
+        self.fv_create_tag = lambda: None
+
         self.create_main_tab()
         self.create_tag_tab()
-
-    def delete_selected_transaction(self) -> None:
-        raise NotImplementedError()
-
-    def create_transaction(self, name: str, description: str, tags: list) -> None:
-        raise NotImplementedError()
 
     def f_add_transaction_button(self) -> None:
 
@@ -117,10 +124,11 @@ class GUIApplication:
 
         def tmp_f() -> None:
             if info_name.entry.get("1.0", "end-1c") and info_description.entry.get("1.0", "end-1c"):
-                self.create_transaction(name=info_name.entry.get("1.0", "end-1c"),
-                                        description=info_description.entry.get(
-                                            "1.0", "end-1c"),
-                                        tags=info_tags.get_assets().keys())
+                self.fv_create_transaction(
+                    name=info_name.entry.get("1.0", "end-1c"),
+                    description=info_description.entry.get("1.0", "end-1c"),
+                    tags=info_tags.get_assets().keys()
+                )
             new_window.destroy()
 
         window_frame.add(info_tags)
@@ -166,7 +174,7 @@ class GUIApplication:
         window_frame = GUIFrame(window_fr, "bottom", relief="flat")
 
         def tmp_f() -> None:
-            self.delete_selected_transaction()
+            self.fv_delete_selected_transaction()
             new_window.destroy()
 
         yes_button = GUIButton("Yes", function=tmp_f)
@@ -184,13 +192,13 @@ class GUIApplication:
             self.transaction_tab, fill="both", expand=True)
 
         # Transaction history frame
-        self.tag_list_frame = GUIFrame(
+        self.transaction_list_frame = GUIFrame(
             self.main_tab_frame.frame, side="left", fill="both")
 
-        self.tags_listbox = GUIListBox(30, "Transaction History")
-        self.tag_list_frame.add(self.tags_listbox)
+        self.transaction_listbox = GUIListBox(30, "Transaction History")
+        self.transaction_list_frame.add(self.transaction_listbox)
 
-        self.main_tab_frame.add(self.tag_list_frame)
+        self.main_tab_frame.add(self.transaction_list_frame)
 
         # Information and buttons frmae
         self.info_and_buttons_frame = GUIFrame(
@@ -286,8 +294,10 @@ class GUIApplication:
         window_frame.add(info_frame)
 
         def tmp_f() -> None:
-            self.create_tag(name=info_name.entry.get(
-                "1.0", "end-1c"), description=info_description.entry.get("1.0", "end-1c"))
+            self.fv_create_tag(
+                name=info_name.entry.get("1.0", "end-1c"),
+                description=info_description.entry.get("1.0", "end-1c")
+            )
             new_window.destroy()
 
         buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
@@ -331,7 +341,7 @@ class GUIApplication:
         window_frame = GUIFrame(window_fr, "bottom", relief="flat")
 
         def tmp_f() -> None:
-            self.delete_selected_tag()
+            self.fv_delete_selected_tag()
             new_window.destroy()
 
         yes_button = GUIButton("Yes", function=tmp_f)
@@ -407,10 +417,14 @@ class GUIApplication:
 
         self.notebook.add(self.tag_tab, text="Tag")
 
+    def add_transaction_to_display(self, transaction: Transaction) -> None:
+        self.transaction_listbox.add_item(transaction.__str__())
+ 
+
     def run(self) -> None:
         self.root.mainloop()
 
 if __name__ == "__main__":
-    app = GUIApplication()
+    app = GUI()
     app.run()
 
