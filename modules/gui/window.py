@@ -67,8 +67,11 @@ class GUI:
         # Title
         self.root.title("Money Tracker")
 
-        self.root.update_idletasks()
-        self.root.attributes('-zoomed', True)
+        # self.root.update_idletasks()
+        # self.root.attributes('-zoomed', True)
+
+        w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        self.root.geometry("%dx%d+0+0" % (w, h))
 
         # Window size and position
         # window_width = 800
