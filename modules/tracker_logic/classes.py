@@ -230,22 +230,24 @@ class Transaction(TrackerObject):
         return new_transaction
 
     def __str__(self) -> str:
-        prefix = " "
+        # empty_char = "\u2591"
+        empty_char = " "
+        prefix = empty_char
 
         if self.balance > 0:
-            prefix += " " * len(MONEY_LEVELS) + "\u2588"
+            prefix += empty_char * len(MONEY_LEVELS) + "\u2588"
             for level in MONEY_LEVELS:
                 if self.balance >= level:
                     prefix += "\u2588"
                 else:
-                    prefix += " "
+                    prefix += empty_char
         else:
             for level in MONEY_LEVELS[::-1]:
                 if self.balance <= -level:
                     prefix += "\u2588"
                 else:
-                    prefix += " "
-            prefix += "\u2588" + " " * len(MONEY_LEVELS)
+                    prefix += empty_char
+            prefix += "\u2588" + empty_char * len(MONEY_LEVELS)
 
         balance_text = str(self.balance)
 

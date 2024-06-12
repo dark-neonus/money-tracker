@@ -722,7 +722,8 @@ class GUI:
         default_font = tk.font.nametofont("TkDefaultFont")
 
         default_font.configure(
-            family="Comic Sans MS", 
+            # family="Comic Sans MS",
+            family="Consolas",
             size=10, 
             weight=font.NORMAL,
         )
