@@ -14,3 +14,4 @@ def write_to_file(path: os.path, content: str) -> None:
 def read_from_file(path: os.path) -> dict:
     with open(path, "r") as file:
         return json.load(file)
+    

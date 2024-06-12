@@ -11,6 +11,7 @@ class GUILabelAndEntry(GUIElement):
         default_text: str = "",
         row_count: int = 1,
         row_width: int = 30,
+        only_numbers: bool = False,
     ) -> None:
 
         super().__init__(side="top", fill="x", expand=True, padx=10, pady=10)
@@ -23,6 +24,8 @@ class GUILabelAndEntry(GUIElement):
 
         self.entry_side = "left"
         self.entry_left_offset = 10
+
+        self.only_numbers = only_numbers
 
     def pack(self, root: tk.Frame) -> None:
 
@@ -44,12 +47,52 @@ class GUILabelAndEntry(GUIElement):
         self.label: ttk.Label = ttk.Label(self.frame, text=self.label_text)
         self.label.pack(side="left")
 
-        self.entry: tk.Text = tk.Text(
-            self.frame, height=self.row_count, width=self.row_width
-        )
+        if self.only_numbers:
+            self.entry: tk.Entry = tk.Entry(
+                self.frame, width=self.row_width
+            )
+            self.entry.insert("0", self.default_text)
+        else:
+            self.entry: tk.Text = tk.Text(
+                self.frame, height=self.row_count, width=self.row_width
+            )
+            self.entry.insert("1.0", self.default_text)
 
-        self.entry.insert("1.0", self.default_text)
+        
         self.entry.configure(state="normal" if self.edible else "disable")
+
+        if self.edible and self.only_numbers:
+            validate_command = (
+            self.entry.register(self.__validate),
+            '%P',
+            '%d',
+            )
+            self.entry.configure(validate="key", validatecommand=validate_command)
+
         self.entry.pack(
             side=self.entry_side, padx=10 if self.entry_side == "left" else 0
         )
+
+    def update_text(self, new_text : str) -> None:
+        edible = bool(self.edible)
+
+        self.entry.configure(state="normal")
+        if self.only_numbers:
+            self.entry.delete("0", "end")
+            self.entry.insert("0", new_text)
+        else:
+            self.entry.delete("1.0", "end")
+            self.entry.insert("1.0", new_text)
+
+        self.entry.configure(state="normal" if edible else "disable")
+
+    def __validate(self, text, action):
+        if (
+            all(char in "0123456789.-" for char in text) and  # all characters are valid
+            "-" not in text[1:] and # "-" is the first character or not present
+            text.count(".") <= 1): # only 0 or 1 periods
+                return True
+        else:
+            return False
+
+        return False

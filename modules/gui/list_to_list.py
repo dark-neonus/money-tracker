@@ -7,6 +7,7 @@ class GUIListToList(GUIElement):
     def __init__(
         self,
         source_dict: dict[str, str],
+        asset_dict: dict[str, str] = {},
         assets_header: str = "",
         source_header: str = "",
         row_count: int = 5,
@@ -25,6 +26,9 @@ class GUIListToList(GUIElement):
             self.__create_items_list_item(key, False, value)
             for key, value in source_dict.items()
         ]
+
+        for key, value in asset_dict.items():
+            self.items_list.append(self.__create_items_list_item(key, True, value))
 
         self.source_header: str = source_header
         self.assets_header: str = assets_header

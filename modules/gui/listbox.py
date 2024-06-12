@@ -7,8 +7,9 @@ class GUIListBox(GUIElement):
     def __init__(
             self,
             row_count: int,
-            label_text:
-            str = ""
+            label_text: str = "",
+            vscrollbar: bool = False,
+            hscrollbar: bool = False,
     ) -> None:
 
         super().__init__(
@@ -22,6 +23,13 @@ class GUIListBox(GUIElement):
         self.row_count = row_count
         self.label_text: str = label_text
         self.listbox: tk.Listbox = None
+
+        self.__vscrollbar = vscrollbar
+        self.__hscrollbar = hscrollbar
+        self.v_scrollbar_side = "right"
+        self.h_scrollbar_side = "bottom"
+
+        self.listbox_width = None
 
     def add_item(self, item: str) -> None:
         self.listbox.insert(tk.END, item)
@@ -43,6 +51,9 @@ class GUIListBox(GUIElement):
         if selected_index:
             self.set_item(selected_index, item)
 
+    def clear(self) -> None:
+        self.listbox.delete(0, tk.END)
+
     def pack(self, root: tk.Frame) -> None:
         self.main_frame: tk.Frame = tk.Frame(
             root,
@@ -59,9 +70,32 @@ class GUIListBox(GUIElement):
             pady=self.pady,
         )
 
-        self.listbox: tk.Listbox = tk.Listbox(
-            self.main_frame, height=self.row_count)
-        self.listbox.pack(side="bottom", expand=True, fill="both")
-
         self.label = tk.Label(self.main_frame, text=self.label_text)
-        self.label.pack(side="bottom", expand=False, fill="both")
+        self.label.pack(side="top", expand=False, fill="both")
+
+        self.listbox: tk.Listbox = tk.Listbox(self.main_frame, height=self.row_count)
+        
+        if self.__vscrollbar:
+            self.v_scrollbar = tk.Scrollbar(
+                self.main_frame,
+                orient=tk.VERTICAL,
+                command=self.listbox.yview
+            )
+            self.listbox.config(yscrollcommand=self.v_scrollbar.set)
+            self.v_scrollbar.pack(side=self.v_scrollbar_side, fill="y")
+
+        if self.__hscrollbar:
+            self.h_scrollbar = tk.Scrollbar(
+                self.main_frame,
+                orient=tk.HORIZONTAL,
+                command=self.listbox.xview
+            )
+            self.listbox.config(xscrollcommand=self.h_scrollbar.set)
+            self.h_scrollbar.pack(side=self.h_scrollbar_side, fill="x")
+
+        if self.listbox_width:
+            self.listbox.config(width=self.listbox_width)
+
+        self.listbox.pack(side="top", expand=True, fill="both")
+
+        

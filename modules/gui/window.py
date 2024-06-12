@@ -8,10 +8,20 @@ from modules.gui.basic_elements import GUIFrame, GUIButton
 from modules.gui.label_and_entry import GUILabelAndEntry
 from modules.gui.listbox import GUIListBox
 from modules.gui.list_to_list import GUIListToList
-from modules.tracker_logic.classes import Transaction
+from modules.tracker_logic.classes import Transaction, Tag
+
+from typing import Dict
+
+from datetime import date
+import datetime
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, font
+from tkinter import messagebox 
+
+# MONEY_LEVELS = [100, 500, 1000, 2500, 5000]
+
+LEVEL_MARK = "."
 
 def create_window(title: str, width: int, height: int, min_width: int = None, min_height: int = None, resizable: bool = True) -> tk.Toplevel:
     """
@@ -47,6 +57,7 @@ def create_window(title: str, width: int, height: int, min_width: int = None, mi
     return window
 
 
+
 class GUI:
     def __init__(self) -> None:
 
@@ -56,37 +67,53 @@ class GUI:
         # Title
         self.root.title("Money Tracker")
 
+        self.root.update_idletasks()
+        self.root.attributes('-zoomed', True)
+
         # Window size and position
-        window_width = 800
-        window_height = 600
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        x_coordinate = (screen_width // 2) - (window_width // 2)
-        y_coordinate = (screen_height // 2) - (window_height // 2)
-        self.root.geometry(
-            f"{window_width}x{window_height}+{x_coordinate}+{y_coordinate}")
-        self.root.minsize(width=600, height=500)
+        # window_width = 800
+        # window_height = 600
+        # screen_width = self.root.winfo_screenwidth()
+        # screen_height = self.root.winfo_screenheight()
+        # x_coordinate = (screen_width // 2) - (window_width // 2)
+        # y_coordinate = (screen_height // 2) - (window_height // 2)
+        # self.root.geometry(
+        #     f"{window_width}x{window_height}+{x_coordinate}+{y_coordinate}")
+
+        self.root.minsize(width=800, height=600)
+        
 
         # Notebook creation
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
         self.fv_delete_selected_transaction = lambda: None
+        self.fv_edit_selected_transaction = lambda: None
         self.fv_create_transaction = lambda: None
 
+        self.fv_get_current_transaction = lambda: None
+        self.fv_get_current_tag = lambda: None
+
         self.fv_delete_selected_tag = lambda: None
+        self.fv_edit_selected_tag = lambda: None
         self.fv_create_tag = lambda: None
+
+        self.tag_list_holder : Dict[str, Tag] = None
+
+        self.init_font()
 
         self.create_main_tab()
         self.create_tag_tab()
+
+        
 
     def f_add_transaction_button(self) -> None:
 
         new_window = create_window(
             "Create transaction",
+            700,
             500,
-            500,
-            min_width=500,
+            min_width=700,
             min_height=500,
             resizable=False
         )
@@ -103,18 +130,28 @@ class GUI:
         info_name = GUILabelAndEntry("Name", edible=True)
         info_name.side = "top"
         info_name.entry_side = "left"
+
         info_description = GUILabelAndEntry(
             "Description", edible=True, row_count=3)
         info_description.side = "top"
         info_description.entry_side = "left"
 
+        info_balance = GUILabelAndEntry("Balance", edible=True, only_numbers=True, default_text="0.0")
+        info_balance.side = "top"
+        info_balance.entry_side = "left"
+
+        info_date = GUILabelAndEntry("Date(YYYY-MM-DD)", edible=True, default_text=date.today().isoformat())
+        info_date.side = "top"
+        info_date.entry_side = "left"
+
         info_frame.add(info_name)
         info_frame.add(info_description)
+        info_frame.add(info_balance)
+        info_frame.add(info_date)
 
         window_frame.add(info_frame)
 
-        tag_list = {"000": "Food", "001": "Car",
-                    "002": "Unexpected", "003": "Fun/Relax"}
+        tag_list = {key : value.name for key, value in self.tag_list_holder.items()}
 
         info_tags = GUIListToList(
             source_dict=tag_list, assets_header="Transaction tags", source_header="Available tags", row_count=6)
@@ -123,13 +160,29 @@ class GUI:
         info_tags.relief = "flat"
 
         def tmp_f() -> None:
-            if info_name.entry.get("1.0", "end-1c") and info_description.entry.get("1.0", "end-1c"):
+            if info_name.entry.get("1.0", "end-1c"):
+
+                try:
+                    transaction_date = date.fromisoformat(info_date.entry.get("1.0", "end-1c"))
+                except:
+                    messagebox.showerror("Error", "Invalid date!", parent=new_window)
+                    return
+
+                try:
+                    balance : float = float(info_balance.entry.get())
+                except:
+                    balance : float = 0
+
                 self.fv_create_transaction(
                     name=info_name.entry.get("1.0", "end-1c"),
                     description=info_description.entry.get("1.0", "end-1c"),
-                    tags=info_tags.get_assets().keys()
+                    balance=balance,
+                    tags_id=info_tags.get_assets().keys(),
+                    date_=transaction_date
                 )
-            new_window.destroy()
+                new_window.destroy()
+            else:
+                messagebox.showinfo("Error", "Please enter name", parent=new_window)
 
         window_frame.add(info_tags)
 
@@ -146,9 +199,140 @@ class GUI:
         window_frame.pack()
 
     def f_edit_transaction_button(self) -> None:
-        raise NotImplementedError()
+        current_transaction : Transaction = self.fv_get_current_transaction()
+
+        if current_transaction == None:
+            messagebox.showinfo("Error", "Please select transaction first", parent=self.root)
+            return
+        
+        new_window = create_window(
+            f"Edit transaction {current_transaction.id}",
+            700,
+            500,
+            min_width=700,
+            min_height=500,
+            resizable=False
+        )
+
+        window_fr = tk.Frame(new_window)
+        window_fr.pack(side="top", expand=True, fill="both")
+
+        window_frame = GUIFrame(window_fr, side="top",
+                                expand=True, fill="both")
+
+        info_frame = GUIFrame(window_frame, side="top",
+                              expand=True, fill="both", relief="flat")
+
+        info_name = GUILabelAndEntry(
+            label_text="Name",
+            edible=True,
+            default_text=current_transaction.name
+            )
+        info_name.side = "top"
+        info_name.entry_side = "left"
+
+        info_description = GUILabelAndEntry(
+            "Description",
+            edible=True,
+            default_text=current_transaction.description,
+            row_count=3
+            )
+        info_description.side = "top"
+        info_description.entry_side = "left"
+
+        info_balance = GUILabelAndEntry(
+            "Balance",
+            edible=True,
+            only_numbers=True,
+            default_text=current_transaction.balance
+            )
+        info_balance.side = "top"
+        info_balance.entry_side = "left"
+
+        info_date = GUILabelAndEntry("Date(YYYY-MM-DD)", edible=True, default_text=current_transaction.date.isoformat())
+        info_date.side = "top"
+        info_date.entry_side = "left"
+
+        info_frame.add(info_name)
+        info_frame.add(info_description)
+        info_frame.add(info_date)
+        info_frame.add(info_balance)
+
+        window_frame.add(info_frame)
+
+        current_tags = {}
+        available_tags = {}
+
+        for tag in self.tag_list_holder.items():
+            if tag[0] in current_transaction.tags_id:
+                current_tags[tag[0]] = tag[1].name
+            else:
+                available_tags[tag[0]] = tag[1].name
+
+        info_tags = GUIListToList(
+            source_dict=available_tags,
+            asset_dict=current_tags,
+            assets_header="Transaction tags",
+            source_header="Available tags",
+            row_count=6
+            )
+        info_tags.fill = "both"
+        info_tags.expand = True
+        info_tags.relief = "flat"
+
+        def tmp_f() -> None:
+            if info_name.entry.get("1.0", "end-1c"):
+
+                try:
+                    transaction_date = date.fromisoformat(info_date.entry.get("1.0", "end-1c"))
+                except:
+                    messagebox.showerror("Error", "Invalid date!", parent=new_window)
+                    return
+
+                try:
+                    balance : float = float(info_balance.entry.get())
+                except:
+                    balance : float = current_transaction.balance
+
+                self.fv_edit_selected_transaction(
+                    transaction=current_transaction,
+                    name=info_name.entry.get("1.0", "end-1c"),
+                    description=info_description.entry.get("1.0", "end-1c"),
+                    balance=balance,
+                    tags_id=info_tags.get_assets().keys(),
+                    date_=transaction_date
+                )
+                new_window.destroy()
+            else:
+                messagebox.showinfo("Error", "Please enter name", parent=new_window)
+
+        window_frame.add(info_tags)
+
+        buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
+
+        create_button = GUIButton("Save", function=tmp_f)
+        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+
+        buttons_frame.add(cancel_button)
+        buttons_frame.add(create_button)
+
+        window_frame.add(buttons_frame)
+
+        window_frame.pack()
 
     def f_remove_transaction_button(self) -> None:
+
+        selected_index = self.transaction_listbox.listbox.curselection()
+        if not selected_index:
+            messagebox.showinfo("Error", "Please select transaction first", parent=self.root)
+            return
+        
+        want_to_delete = messagebox.askyesno("Are you sure?", "Do you realy want to delete selected transaction?", parent=self.root)
+        
+        if want_to_delete:
+            self.fv_delete_selected_transaction()
+
+        return
         new_window = tk.Toplevel()
 
         window_width = 300
@@ -195,8 +379,25 @@ class GUI:
         self.transaction_list_frame = GUIFrame(
             self.main_tab_frame.frame, side="left", fill="both")
 
-        self.transaction_listbox = GUIListBox(30, "Transaction History")
+        self.transaction_listbox = GUIListBox(
+            row_count=30,
+            label_text="Transaction History",
+            vscrollbar=True,
+            hscrollbar=True
+            )
+        self.transaction_listbox.listbox_width = 70
+
+        self.bottom_frame = GUIFrame(
+            self.transaction_list_frame, side="bottom", fill="both", expand=True, relief="flat"
+            )
+        
+        self.info_final_balance = GUILabelAndEntry("Sum", edible=False, row_width=15)
+        
+
+        self.bottom_frame.add(self.info_final_balance)
+
         self.transaction_list_frame.add(self.transaction_listbox)
+        self.transaction_list_frame.add(self.bottom_frame)
 
         self.main_tab_frame.add(self.transaction_list_frame)
 
@@ -210,16 +411,22 @@ class GUI:
 
         self.info_name = GUILabelAndEntry("Name", edible=False)
         self.info_balance = GUILabelAndEntry("Balance", edible=False)
-        self.info_balance.relief = "raised"
+        # self.info_balance.relief = "raised"
         self.info_balance.borderwidth = 2
         self.info_description = GUILabelAndEntry(
-            "Description", edible=False, row_count=3)
+            "Description", edible=False, row_count=4)
+        
+        self.info_date = GUILabelAndEntry("Date(YYYY-MM-DD)", edible=False)
+        
         self.info_tags = GUIListBox(row_count=3, label_text="Tags")
+        self.info_tags.listbox_width = 20
+        
         self.info_id = GUILabelAndEntry("ID", edible=False)
 
         self.info_frame.add(self.info_name)
         self.info_frame.add(self.info_balance)
         self.info_frame.add(self.info_description)
+        self.info_frame.add(self.info_date)
         self.info_frame.add(self.info_tags)
         self.info_frame.add(self.info_id)
 
@@ -257,9 +464,6 @@ class GUI:
 
         self.notebook.add(self.transaction_tab, text="Transactions")
 
-    def create_tag(self, name: str, description: str) -> None:
-        raise NotImplementedError()
-
     def f_add_tag_button(self) -> None:
 
         new_window = create_window(
@@ -294,11 +498,14 @@ class GUI:
         window_frame.add(info_frame)
 
         def tmp_f() -> None:
-            self.fv_create_tag(
-                name=info_name.entry.get("1.0", "end-1c"),
-                description=info_description.entry.get("1.0", "end-1c")
-            )
-            new_window.destroy()
+            if info_name.entry.get("1.0", "end-1c"):
+                self.fv_create_tag(
+                    name=info_name.entry.get("1.0", "end-1c"),
+                    description=info_description.entry.get("1.0", "end-1c")
+                )
+                new_window.destroy()
+            else:
+                messagebox.showinfo("Error", "Please enter name", parent=new_window)
 
         buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
 
@@ -313,7 +520,71 @@ class GUI:
         window_frame.pack()
 
     def f_edit_tag_button(self) -> None:
-        raise NotImplementedError()
+
+        current_tag = self.fv_get_current_tag()
+
+        if current_tag == None:
+            messagebox.showinfo("Error", "Please select tag first", parent=self.root)
+            return
+
+        new_window = create_window(
+            title="Edit tag",
+            width=300,
+            height=300,
+            min_width=300,
+            min_height=300,
+            resizable=False
+        )
+
+        window_fr = tk.Frame(new_window)
+        window_fr.pack(side="top", expand=True, fill="both")
+
+        window_frame = GUIFrame(window_fr, side="top",
+                                expand=True, fill="both")
+
+        info_frame = GUIFrame(window_frame, side="top",
+                              expand=True, fill="both", relief="flat")
+
+        info_name = GUILabelAndEntry("Name", edible=True, default_text=current_tag.name)
+        info_name.side = "top"
+        info_name.entry_side = "left"
+        info_description = GUILabelAndEntry(
+            "Description",
+            edible=True,
+            row_count=3,
+            default_text=current_tag.description
+            )
+        info_description.side = "top"
+        info_description.entry_side = "left"
+
+        info_frame.add(info_name)
+        info_frame.add(info_description)
+
+        window_frame.add(info_frame)
+
+        def tmp_f() -> None:
+            if info_name.entry.get("1.0", "end-1c"):
+                self.fv_edit_selected_tag(
+                    tag=current_tag,
+                    name=info_name.entry.get("1.0", "end-1c"),
+                    description=info_description.entry.get("1.0", "end-1c")
+                )
+                new_window.destroy()
+            else:
+                messagebox.showinfo("Error", "Please enter name", parent=new_window)
+
+        buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
+
+        create_button = GUIButton("Create", function=tmp_f)
+        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+
+        buttons_frame.add(cancel_button)
+        buttons_frame.add(create_button)
+
+        window_frame.add(buttons_frame)
+
+        window_frame.pack()
+
 
     def f_remove_tag_button(self) -> None:
         new_window = tk.Toplevel()
@@ -418,8 +689,42 @@ class GUI:
         self.notebook.add(self.tag_tab, text="Tag")
 
     def add_transaction_to_display(self, transaction: Transaction) -> None:
+        
+        
+
         self.transaction_listbox.add_item(transaction.__str__())
+
+        if transaction.balance > 0:
+            self.transaction_listbox.listbox.itemconfig(
+                index=self.transaction_listbox.listbox.size() - 1,
+                foreground="green"
+            )
+        elif transaction.balance < 0:
+            self.transaction_listbox.listbox.itemconfig(
+                index=self.transaction_listbox.listbox.size() - 1,
+                foreground="red"
+            )
+        else:
+            self.transaction_listbox.listbox.itemconfig(
+                index=self.transaction_listbox.listbox.size() - 1,
+                foreground="grey"
+            )
+        
+
+    def add_tag_to_display(self, tag: Tag) -> None:
+        self.tags_listbox.add_item(tag.__str__())
+
  
+    def init_font(self) -> None:
+        default_font = tk.font.nametofont("TkDefaultFont")
+
+        default_font.configure(
+            family="Comic Sans MS", 
+            size=10, 
+            weight=font.NORMAL,
+        )
+
+        self.root.option_add("*Font", default_font)
 
     def run(self) -> None:
         self.root.mainloop()
