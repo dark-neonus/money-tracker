@@ -8,50 +8,13 @@ from modules.tracker_logic.classes import *
 from modules.gui.window import GUI
 import os
 
-from modules.tracker_logic.classes import TrackerObject
-
-DATA_PATH = "data"
-JOURNALS_PATH = os.path.join(DATA_PATH, "journals")
-SETTINGS_PATH = os.path.join(DATA_PATH, "settigns.json")
-
-DEFAULT_JOURNAL_NAME = "journal_01"
-DEFAULT_JOURNAL_PATH = os.path.join(
-    JOURNALS_PATH, f"{DEFAULT_JOURNAL_NAME}.json")
+from modules.gui.top_menu import GUITopMenu
 
 
-class Settigns(TrackerObject):
-    def __init__(self) -> None:
-        super().__init__("", "", "")
-        self.journal_path: os.path = ""
 
-    def __dict__(self) -> dict:
-        return {
-            "journal_path": self.journal_path
-        }
 
-    def from_dict(self, dict_) -> None:
-        self.journal_path = dict_["journal_path"]
 
-    @staticmethod
-    def create_from_dict(dictionary) -> TrackerObject:
-        settigns = Settigns()
-        settigns.journal_path = dictionary["journal_path"]
-        return settigns
-
-    @staticmethod
-    def get_from_file(path: os.path) -> 'Settigns':
-        settigns = Settigns()
-        settigns.load(path)
-
-        return settigns
-
-    @staticmethod
-    def generate_default_settings() -> 'Settigns':
-        settings = Settigns()
-        settings.journal_path = DEFAULT_JOURNAL_PATH
-
-        return settings
-
+    
 
 class Application:
     def __init__(self) -> None:
@@ -61,17 +24,20 @@ class Application:
         self.filtered_transaction_list = []
 
         self.gui: GUI = None
+        self.top_menu = None
 
-        
+        self.__sort_date_from = None
+        self.__sort_date_to = None
+        self.__sort_tag_to_look = None
 
     def init_app(self) -> None:
 
         # Check if journals folder exists (it will automatically create data folder if needed)
-        if not os.path.exists(JOURNALS_PATH):
-            os.mkdir(JOURNALS_PATH)
+        if not os.path.exists(Settigns.JOURNALS_PATH):
+            os.mkdir(Settigns.JOURNALS_PATH)
         
         self.load_settings(
-            path=SETTINGS_PATH,
+            path=Settigns.SETTINGS_PATH,
             create_if_not_exist=True
         )
 
@@ -89,8 +55,13 @@ class Application:
         self.load_tag_list_to_display(self.journal.tag_list)
 
         self.gui.fv_delete_selected_transaction = self.delete_selected_transaction
-        self.gui.fv_edit_selected_transaction = self.edit_transaction
+        self.gui.um = self.edit_transaction
         self.gui.fv_create_transaction = self.create_transaction
+
+        self.gui.fv_filter_transactions = self.filter_transactions
+        self.gui.fv_clear_filter = self.clear_filter
+        self.gui.fv_sort_transactions_by_date = self.sort_transactions_by_date
+        self.gui.fv_sort_transactions_by_balance = self.sort_transactions_by_balance
 
         self.gui.fv_create_tag = self.create_tag
         self.gui.fv_edit_selected_tag = self.edit_tag
@@ -105,6 +76,8 @@ class Application:
         self.gui.tag_list_holder = self.journal.tag_list.tags
 
         self.update_filtered_sum_text()
+
+        self.top_menu = GUITopMenu(self.gui.root, self.settigns)
         
     def journal_changes(func) -> None:
         def wrapper(self, *args, **kwargs):
@@ -231,6 +204,8 @@ class Application:
         for transaction in transaction_list:
             self.gui.add_transaction_to_display(transaction)
 
+        self.update_filtered_sum_text()
+
     def load_tag_list_to_display(self, tag_list: TagList) -> None:
         self.gui.tags_listbox.clear()
         for tag in tag_list.tags.values():
@@ -252,7 +227,7 @@ class Application:
 
 
     def update_filtered_sum_text(self) -> None:
-        total_sum = sum(transaction.balance for transaction in self.filtered_transaction_list)
+        total_sum = round(sum(transaction.balance for transaction in self.filtered_transaction_list), 5)
         self.gui.info_final_balance.update_text(total_sum)
 
         color = "grey"
@@ -267,8 +242,46 @@ class Application:
     def run(self) -> None:
         self.gui.run()
 
+    def filter_transactions(self, date_from : date, date_to : date, tag_to_look : str) -> None:
+        self.filtered_transaction_list = []
+
+        self.__sort_date_from = date_from
+        self.__sort_date_to = date_to
+        self.__sort_tag_to_look = tag_to_look
+
+        for transaction in self.journal.transaction_list:
+            if (self.__sort_date_from == None or transaction.date >= self.__sort_date_from) and \
+                    (self.__sort_date_to == None or transaction.date <= self.__sort_date_to) and \
+                    (self.__sort_tag_to_look == None or self.__sort_tag_to_look in transaction.tags_id):
+                self.filtered_transaction_list.append(transaction)
+        
+        
+        self.load_transaction_list_to_display(self.filtered_transaction_list)
     
+    def clear_filter(self) -> None:
+        self.filter_transactions(None, None, None)
+
+    @journal_changes
+    def sort_transactions_by_date(self) -> None:
+        self.journal.transaction_list.sort(key=lambda x: x.date, reverse=True)
+        self.filter_transactions(self.__sort_date_from, self.__sort_date_to, self.__sort_tag_to_look)
+        self.load_transaction_list_to_display(self.filtered_transaction_list)
+
+    @journal_changes
+    def sort_transactions_by_balance(self) -> None:
+        self.journal.transaction_list.sort(key=lambda x: x.balance, reverse=True)
+        self.filter_transactions(self.__sort_date_from, self.__sort_date_to, self.__sort_tag_to_look)
+        self.load_transaction_list_to_display(self.filtered_transaction_list)
+
+    @journal_changes
+    def sort_transaction_random(self) -> None:
+        import random
+        random.shuffle(self.journal.transaction_list)
+        self.filter_transactions(self.__sort_date_from, self.__sort_date_to, self.__sort_tag_to_look)
+        self.load_transaction_list_to_display(self.filtered_transaction_list)
+
 if __name__ == "__main__":
     app = Application()
     app.init_app()
     app.run()
+

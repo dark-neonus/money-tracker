@@ -94,12 +94,19 @@ class GUI:
         self.fv_edit_selected_transaction = lambda: None
         self.fv_create_transaction = lambda: None
 
+        self.fv_sort_transactions_by_date = lambda: None
+        self.fv_sort_transactions_by_balance = lambda: None
+        self.fv_filter_transactions = lambda: None
+        self.fv_clear_filter = lambda: None
+
         self.fv_get_current_transaction = lambda: None
         self.fv_get_current_tag = lambda: None
 
         self.fv_delete_selected_tag = lambda: None
         self.fv_edit_selected_tag = lambda: None
         self.fv_create_tag = lambda: None
+
+        
 
         self.tag_list_holder : Dict[str, Tag] = None
 
@@ -127,9 +134,6 @@ class GUI:
         window_frame = GUIFrame(window_fr, side="top",
                                 expand=True, fill="both")
 
-        info_frame = GUIFrame(window_frame, side="top",
-                              expand=True, fill="both", relief="flat")
-
         info_name = GUILabelAndEntry("Name", edible=True)
         info_name.side = "top"
         info_name.entry_side = "left"
@@ -147,12 +151,10 @@ class GUI:
         info_date.side = "top"
         info_date.entry_side = "left"
 
-        info_frame.add(info_name)
-        info_frame.add(info_description)
-        info_frame.add(info_balance)
-        info_frame.add(info_date)
-
-        window_frame.add(info_frame)
+        window_frame.add(info_name)
+        window_frame.add(info_description)
+        window_frame.add(info_balance)
+        window_frame.add(info_date)
 
         tag_list = {key : value.name for key, value in self.tag_list_holder.items()}
 
@@ -223,9 +225,6 @@ class GUI:
         window_frame = GUIFrame(window_fr, side="top",
                                 expand=True, fill="both")
 
-        info_frame = GUIFrame(window_frame, side="top",
-                              expand=True, fill="both", relief="flat")
-
         info_name = GUILabelAndEntry(
             label_text="Name",
             edible=True,
@@ -256,12 +255,10 @@ class GUI:
         info_date.side = "top"
         info_date.entry_side = "left"
 
-        info_frame.add(info_name)
-        info_frame.add(info_description)
-        info_frame.add(info_date)
-        info_frame.add(info_balance)
-
-        window_frame.add(info_frame)
+        window_frame.add(info_name)
+        window_frame.add(info_description)
+        window_frame.add(info_date)
+        window_frame.add(info_balance)
 
         current_tags = {}
         available_tags = {}
@@ -335,42 +332,89 @@ class GUI:
         if want_to_delete:
             self.fv_delete_selected_transaction()
 
-        return
-        new_window = tk.Toplevel()
+    def f_filter_transaction_button(self) -> None:
 
-        window_width = 300
-        window_height = 100
-        screen_width = new_window.winfo_screenwidth()
-        screen_height = new_window.winfo_screenheight()
-        x_coordinate = (screen_width / 2) - (window_width / 2)
-        y_coordinate = (screen_height / 2) - (window_height / 2)
-        new_window.geometry("%dx%d+%d+%d" % (window_width,
-                            window_height, x_coordinate, y_coordinate))
-
-        new_window.resizable(False, False)
-
-        new_window.title("Are you sure?")
+        new_window = create_window(
+            "Filter transactions",
+            700,
+            500,
+            min_width=700,
+            min_height=500,
+            resizable=False
+        )
 
         window_fr = tk.Frame(new_window)
-        window_fr.pack()
+        window_fr.pack(side="top", expand=True, fill="both")
 
-        label = tk.Label(
-            window_fr, text="Do you realy want to delete selected transaction?")
-        label.pack(side="top", fill="both", pady=10)
+        window_frame = GUIFrame(window_fr, side="top",
+                                expand=True, fill="both")
 
-        window_frame = GUIFrame(window_fr, "bottom", relief="flat")
+        info_tag_to_look = GUIListBox(
+            row_count=10,
+            label_text="Select tag to look for (optional)",
+            vscrollbar=True
+            )
+        info_tag_to_look.side = "top"
+        
+
+        info_date_from = GUILabelAndEntry("Date from <YYYY-MM-DD> (optional)", row_count=1)
+        info_date_from.side = "top"
+        info_date_to = GUILabelAndEntry("Date to <YYYY-MM-DD> (optional)", row_count=1)
+        info_date_to.side = "top"
+
+        window_frame.add(info_tag_to_look)
+        window_frame.add(info_date_from)
+        window_frame.add(info_date_to)
 
         def tmp_f() -> None:
-            self.fv_delete_selected_transaction()
+            # Tag
+            selected_tag_index = info_tag_to_look.listbox.curselection() 
+            if selected_tag_index:
+                selected_tag = list(self.tag_list_holder.keys())[selected_tag_index[0]]
+            else:
+                selected_tag = None
+            # Date from
+            date_from = info_date_from.entry.get("1.0", "end-1c")
+            if date_from:
+                try:
+                    date_from = date.fromisoformat(date_from)
+                except:
+                    messagebox.showerror("Error", "Invalid date from!", parent=new_window)
+                    return
+            else:
+                date_from = None
+            # Date to
+            date_to = info_date_to.entry.get("1.0", "end-1c")
+            if date_to:
+                try:
+                    date_to = date.fromisoformat(date_to)
+                except:
+                    messagebox.showerror("Error", "Invalid date to!", parent=new_window)
+                    return
+            else:
+                date_to = None
+
+            self.fv_filter_transactions(
+                tag_to_look=selected_tag,
+                date_from=date_from,
+                date_to=date_to
+            )
             new_window.destroy()
 
-        yes_button = GUIButton("Yes", function=tmp_f)
-        no_button = GUIButton("No", function=new_window.destroy)
+        buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
 
-        window_frame.add(no_button)
-        window_frame.add(yes_button)
+        filter_button = GUIButton("Filter", function=tmp_f)
+        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+
+        buttons_frame.add(cancel_button)
+        buttons_frame.add(filter_button)
+
+        window_frame.add(buttons_frame)
 
         window_frame.pack()
+
+        for tag in self.tag_list_holder.values():
+            info_tag_to_look.add_item(tag.name)
 
     def create_main_tab(self) -> None:
         # Tab frame
@@ -390,17 +434,44 @@ class GUI:
             )
         self.transaction_listbox.listbox_width = 70
 
-        self.bottom_frame = GUIFrame(
+        self.bottom_panel_frame = GUIFrame(
             self.transaction_list_frame, side="bottom", fill="both", expand=True, relief="flat"
             )
         
         self.info_final_balance = GUILabelAndEntry("Sum", edible=False, row_width=15)
-        
+        self.info_final_balance.side = "left"
 
-        self.bottom_frame.add(self.info_final_balance)
+        self.sort_buttons_frame = GUIFrame(self.bottom_panel_frame, side="left", fill="none", expand=True, relief="flat")
+        def sort_date_f_holder() -> None:
+            self.fv_sort_transactions_by_date()
+        def sort_balance_f_holder() -> None:
+            self.fv_sort_transactions_by_balance()
+        self.sort_date_button = GUIButton("Sort by date", function=sort_date_f_holder)
+        self.sort_date_button.side = "top"
+        self.sort_balance_button = GUIButton("Sort by balance", function=sort_balance_f_holder)
+        self.sort_balance_button.side = "top"
+
+        self.sort_buttons_frame.add(self.sort_date_button)
+        self.sort_buttons_frame.add(self.sort_balance_button)
+
+        self.filter_buttons_frame = GUIFrame(self.bottom_panel_frame, side="left", fill="none", expand=True, relief="flat")
+
+        def clear_filter_f_holder() -> None:
+            self.fv_clear_filter()
+        self.filter_button = GUIButton("Filter", function=self.f_filter_transaction_button)
+        self.filter_button.side = "top"
+        self.clear_filter_button = GUIButton("Clear filter", function=clear_filter_f_holder)
+        self.clear_filter_button.side = "top"
+
+        self.filter_buttons_frame.add(self.filter_button)
+        self.filter_buttons_frame.add(self.clear_filter_button)
+
+        self.bottom_panel_frame.add(self.info_final_balance)
+        self.bottom_panel_frame.add(self.sort_buttons_frame)
+        self.bottom_panel_frame.add(self.filter_buttons_frame)
 
         self.transaction_list_frame.add(self.transaction_listbox)
-        self.transaction_list_frame.add(self.bottom_frame)
+        self.transaction_list_frame.add(self.bottom_panel_frame)
 
         self.main_tab_frame.add(self.transaction_list_frame)
 
@@ -484,9 +555,6 @@ class GUI:
         window_frame = GUIFrame(window_fr, side="top",
                                 expand=True, fill="both")
 
-        info_frame = GUIFrame(window_frame, side="top",
-                              expand=True, fill="both", relief="flat")
-
         info_name = GUILabelAndEntry("Name", edible=True)
         info_name.side = "top"
         info_name.entry_side = "left"
@@ -495,10 +563,8 @@ class GUI:
         info_description.side = "top"
         info_description.entry_side = "left"
 
-        info_frame.add(info_name)
-        info_frame.add(info_description)
-
-        window_frame.add(info_frame)
+        window_frame.add(info_name)
+        window_frame.add(info_description)
 
         def tmp_f() -> None:
             if info_name.entry.get("1.0", "end-1c"):
@@ -545,9 +611,6 @@ class GUI:
         window_frame = GUIFrame(window_fr, side="top",
                                 expand=True, fill="both")
 
-        info_frame = GUIFrame(window_frame, side="top",
-                              expand=True, fill="both", relief="flat")
-
         info_name = GUILabelAndEntry("Name", edible=True, default_text=current_tag.name)
         info_name.side = "top"
         info_name.entry_side = "left"
@@ -560,10 +623,8 @@ class GUI:
         info_description.side = "top"
         info_description.entry_side = "left"
 
-        info_frame.add(info_name)
-        info_frame.add(info_description)
-
-        window_frame.add(info_frame)
+        window_frame.add(info_name)
+        window_frame.add(info_description)
 
         def tmp_f() -> None:
             if info_name.entry.get("1.0", "end-1c"):
@@ -588,43 +649,18 @@ class GUI:
 
         window_frame.pack()
 
-
     def f_remove_tag_button(self) -> None:
-        new_window = tk.Toplevel()
 
-        window_width = 300
-        window_height = 100
-        screen_width = new_window.winfo_screenwidth()
-        screen_height = new_window.winfo_screenheight()
-        x_coordinate = (screen_width / 2) - (window_width / 2)
-        y_coordinate = (screen_height / 2) - (window_height / 2)
-        new_window.geometry("%dx%d+%d+%d" % (window_width,
-                            window_height, x_coordinate, y_coordinate))
-
-        new_window.resizable(False, False)
-
-        new_window.title("Are you sure?")
-
-        window_fr = tk.Frame(new_window)
-        window_fr.pack()
-
-        label = tk.Label(
-            window_fr, text="Do you realy want to delete selected tag?")
-        label.pack(side="top", fill="both", pady=10)
-
-        window_frame = GUIFrame(window_fr, "bottom", relief="flat")
-
-        def tmp_f() -> None:
+        selected_index = self.tags_listbox.listbox.curselection()
+        if not selected_index:
+            messagebox.showinfo("Error", "Please select tag first", parent=self.root)
+            return
+        
+        want_to_delete = messagebox.askyesno("Are you sure?", "Do you realy want to delete selected tag?", parent=self.root)
+        
+        if want_to_delete:
             self.fv_delete_selected_tag()
-            new_window.destroy()
 
-        yes_button = GUIButton("Yes", function=tmp_f)
-        no_button = GUIButton("No", function=new_window.destroy)
-
-        window_frame.add(no_button)
-        window_frame.add(yes_button)
-
-        window_frame.pack()
 
     def create_tag_tab(self) -> None:
         # Tab frame

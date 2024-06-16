@@ -367,3 +367,59 @@ class Journal(TrackerObject):
             self.__id_counter += 1
             
         return new_id
+
+
+class Settigns(TrackerObject):
+    DATA_PATH = "data"
+    JOURNALS_PATH = os.path.join(DATA_PATH, "journals")
+    SETTINGS_PATH = os.path.join(DATA_PATH, "settigns.json")
+
+    DEFAULT_JOURNAL_NAME = "journal_01"
+    DEFAULT_JOURNAL_PATH = os.path.join(
+    JOURNALS_PATH, f"{DEFAULT_JOURNAL_NAME}.json")
+
+    DEFAULT_LANGUAGE = "EN"
+
+    def __init__(self) -> None:
+        super().__init__("settings", "", "")
+        self.journal_path: os.path = ""
+        self.language = "UA"
+        self.recent_journal_paths: List[str] = []
+
+    def __dict__(self) -> dict:
+        return {
+            "journal_path": self.journal_path,
+            "language": self.language,
+            "recent_journal_paths": self.recent_journal_paths
+        }
+
+    def from_dict(self, dict_) -> None:
+        self.journal_path = dict_["journal_path"]
+        self.language = dict_["language"]
+        self.recent_journal_paths = dict_["recent_journal_paths"]
+
+    @staticmethod
+    def create_from_dict(dict_) -> TrackerObject:
+        settigns = Settigns()
+        settigns.journal_path = dict_["journal_path"]
+        settigns.language = dict_["language"]
+        settigns.recent_journal_paths = dict_["recent_journal_paths"]
+        return settigns
+
+    @staticmethod
+    def get_from_file(path: os.path) -> 'Settigns':
+        settigns = Settigns()
+        settigns.load(path)
+
+        return settigns
+
+    @staticmethod
+    def generate_default_settings() -> 'Settigns':
+        settings = Settigns()
+        settings.journal_path = Settigns.DEFAULT_JOURNAL_PATH
+        settings.language = Settigns.DEFAULT_LANGUAGE
+        settings.recent_journal_paths = []
+
+        return settings
+
+
