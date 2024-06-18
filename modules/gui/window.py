@@ -9,6 +9,7 @@ from modules.gui.label_and_entry import GUILabelAndEntry
 from modules.gui.listbox import GUIListBox
 from modules.gui.list_to_list import GUIListToList
 from modules.tracker_logic.classes import Transaction, Tag
+from modules.tracker_logic.fonts import FONTS 
 
 from typing import Dict
 
@@ -59,7 +60,7 @@ def create_window(title: str, width: int, height: int, min_width: int = None, mi
 
 
 class GUI:
-    def __init__(self) -> None:
+    def __init__(self, font_index : int, font_size : int) -> None:
 
         # Root init
         self.root = tk.Tk()
@@ -106,7 +107,8 @@ class GUI:
         self.fv_edit_selected_tag = lambda: None
         self.fv_create_tag = lambda: None
 
-        
+        self.font_index = font_index
+        self.font_size = font_size
 
         self.tag_list_holder : Dict[str, Tag] = None
 
@@ -759,8 +761,8 @@ class GUI:
 
         default_font.configure(
             # family="Comic Sans MS",
-            family="Consolas",
-            size=10, 
+            family=FONTS[self.font_index],
+            size=self.font_size, 
             weight=font.NORMAL,
         )
 

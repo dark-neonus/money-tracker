@@ -29,6 +29,9 @@ class GUIListBox(GUIElement):
         self.v_scrollbar_side = "right"
         self.h_scrollbar_side = "bottom"
 
+        self.selected_foreground_color = "black"
+        self.selected_background_color = "light grey"
+
         self.listbox_width = None
 
     def add_item(self, item: str) -> None:
@@ -73,7 +76,12 @@ class GUIListBox(GUIElement):
         self.label = tk.Label(self.main_frame, text=self.label_text)
         self.label.pack(side="top", expand=False, fill="both")
 
-        self.listbox: tk.Listbox = tk.Listbox(self.main_frame, height=self.row_count)
+        self.listbox: tk.Listbox = tk.Listbox(
+            self.main_frame,
+            height=self.row_count,
+            selectbackground=self.selected_background_color,
+            selectforeground=self.selected_foreground_color
+            )
         
         if self.__vscrollbar:
             self.v_scrollbar = tk.Scrollbar(

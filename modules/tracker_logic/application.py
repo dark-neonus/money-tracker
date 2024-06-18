@@ -1,16 +1,18 @@
-if __name__ == "__main__":
-    import sys
-    import os.path
+import sys
+import os
 
+if __name__ == "__main__":
     sys.path[0] = os.path.join(sys.path[0], "..", "..")
 
 from modules.tracker_logic.classes import *
 from modules.gui.window import GUI
-import os
+
+
+from tkinter import messagebox
 
 from modules.gui.top_menu import GUITopMenu
 
-
+from modules.tracker_logic.languages import save_text_set, load_full_language_pack, extract_text_set_from_language_pack
 
 
 
@@ -18,7 +20,7 @@ from modules.gui.top_menu import GUITopMenu
 
 class Application:
     def __init__(self) -> None:
-        self.settigns: Settigns = None
+        self.settings: Settings = None
 
         self.journal: Journal = None
         self.filtered_transaction_list = []
@@ -33,20 +35,25 @@ class Application:
     def init_app(self) -> None:
 
         # Check if journals folder exists (it will automatically create data folder if needed)
-        if not os.path.exists(Settigns.JOURNALS_PATH):
-            os.mkdir(Settigns.JOURNALS_PATH)
+        if not os.path.exists(Settings.JOURNALS_PATH):
+            os.mkdir(Settings.JOURNALS_PATH)
         
         self.load_settings(
-            path=Settigns.SETTINGS_PATH,
+            path=Settings.SETTINGS_PATH,
             create_if_not_exist=True
         )
+
+        save_text_set()
+
+        self.lang_pack = load_full_language_pack()
+        self.Text = extract_text_set_from_language_pack(self.settings.language_index, self.lang_pack)
 
         self.load_journal(
-            path=self.settigns.journal_path,
+            path=self.settings.journal_path,
             create_if_not_exist=True
         )
 
-        self.gui = GUI()
+        self.gui = GUI(self.settings.font_index, self.settings.font_size)
         self.init_gui()
 
     def init_gui(self) -> None:
@@ -55,7 +62,7 @@ class Application:
         self.load_tag_list_to_display(self.journal.tag_list)
 
         self.gui.fv_delete_selected_transaction = self.delete_selected_transaction
-        self.gui.um = self.edit_transaction
+        self.gui.fv_edit_selected_transaction = self.edit_transaction
         self.gui.fv_create_transaction = self.create_transaction
 
         self.gui.fv_filter_transactions = self.filter_transactions
@@ -77,12 +84,12 @@ class Application:
 
         self.update_filtered_sum_text()
 
-        self.top_menu = GUITopMenu(self.gui.root, self.settigns)
+        self.top_menu = GUITopMenu(self.gui.root, self.settings, self.close_app)
         
     def journal_changes(func) -> None:
         def wrapper(self, *args, **kwargs):
             func(self, *args, **kwargs)
-            self.journal.save(self.settigns.journal_path)
+            self.journal.save(self.settings.journal_path)
             self.update_filtered_sum_text()
         return wrapper
 
@@ -174,18 +181,28 @@ class Application:
             self.gui.tag_info_id.update_text(selected_tag.id)
 
     def load_settings(self, path: os.path, create_if_not_exist: bool = False) -> None:
-        if os.path.exists(path):
-            self.settigns = Settigns.get_from_file(path)
-        elif(create_if_not_exist):
-            Settigns.generate_default_settings().save(path)
+        if not os.path.exists(path) and create_if_not_exist:
+            Settings.generate_default_settings().save(path)
+        try:
+            self.settings = Settings.get_from_file(path)
+        except:
+            restart_settings = messagebox.askyesno("Error", "Error during reading settings.json. Do you want to use default settings?")
+            if restart_settings:
+                self.settings = Settings.generate_default_settings()
+            else:
+                print("Error during reading settings.json. Exiting...")
+                sys.exit(0)
+            
 
     def load_journal(self, path: os.path, create_if_not_exist: bool = False) -> None:
-        if os.path.exists(self.settigns.journal_path):
-            self.journal = Journal.get_from_file(self.settigns.journal_path)
+        if os.path.exists(self.settings.journal_path):
+            self.journal = Journal.get_from_file(self.settings.journal_path)
         elif (create_if_not_exist):
             self.journal = Journal(
-                DEFAULT_JOURNAL_NAME, "This journal was created automatically", "#jr000", TagList([]), [])
-            self.journal.save(self.settigns.journal_path)
+                Settings.DEFAULT_JOURNAL_NAME, "This journal was created automatically", "#jr000", TagList([]), [])
+            self.journal.save(self.settings.journal_path)
+
+        self.settings.add_recent_journal_path(self.settings.journal_path)
 
         self.filtered_transaction_list = self.journal.transaction_list[:]
 
@@ -279,6 +296,9 @@ class Application:
         random.shuffle(self.journal.transaction_list)
         self.filter_transactions(self.__sort_date_from, self.__sort_date_to, self.__sort_tag_to_look)
         self.load_transaction_list_to_display(self.filtered_transaction_list)
+
+    def close_app(self) -> None:
+        self.gui.root.quit()
 
 if __name__ == "__main__":
     app = Application()

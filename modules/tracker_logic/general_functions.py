@@ -6,7 +6,7 @@ def nice_dict_(dict_: dict) -> str:
     return json.dumps(dict_, indent="\t")
 
 
-def write_to_file(path: os.path, content: str) -> None:
+def write_to_file(path: os.path, content) -> None:
     with open(path, "w") as file:
         json.dump(content, file, indent="\t")
 

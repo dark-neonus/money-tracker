@@ -369,55 +369,91 @@ class Journal(TrackerObject):
         return new_id
 
 
-class Settigns(TrackerObject):
+class Settings(TrackerObject):
     DATA_PATH = "data"
     JOURNALS_PATH = os.path.join(DATA_PATH, "journals")
-    SETTINGS_PATH = os.path.join(DATA_PATH, "settigns.json")
+    SETTINGS_PATH = os.path.join(DATA_PATH, "settings.json")
 
     DEFAULT_JOURNAL_NAME = "journal_01"
     DEFAULT_JOURNAL_PATH = os.path.join(
     JOURNALS_PATH, f"{DEFAULT_JOURNAL_NAME}.json")
 
-    DEFAULT_LANGUAGE = "EN"
+    DEFAULT_LANGUAGE_INDEX = 0
+    DEFAULT_FONT_INDEX = 0
+    DEFAULT_FONT_SIZE = 11
 
     def __init__(self) -> None:
         super().__init__("settings", "", "")
         self.journal_path: os.path = ""
-        self.language = "UA"
+        self.language_index = 0
+        self.font_index = 0
+        self.font_size = 0
         self.recent_journal_paths: List[str] = []
+
+    def settings_changes(func) -> None:
+
+        def wrapper(self, *args, **kwargs) -> None:
+            func(self, *args, **kwargs)
+            self.save(self.SETTINGS_PATH)
+        return wrapper
+
+    @settings_changes
+    def add_recent_journal_path(self, path : os.path) -> None:
+        if path not in self.recent_journal_paths:
+            self.recent_journal_paths.append(path)
+
+    @settings_changes
+    def set_language_index(self, index: int) -> None:
+        self.language_index = index
+
+    @settings_changes
+    def set_font_index(self, index: int) -> None:
+        self.font_index = index
+
+    @settings_changes
+    def set_font_size(self, size: int) -> None:
+        self.font_size = size
 
     def __dict__(self) -> dict:
         return {
             "journal_path": self.journal_path,
-            "language": self.language,
+            "language_index": self.language_index,
+            "font_index": self.font_index,
+            "font_size": self.font_size,
             "recent_journal_paths": self.recent_journal_paths
         }
 
     def from_dict(self, dict_) -> None:
         self.journal_path = dict_["journal_path"]
-        self.language = dict_["language"]
+        self.language_index = dict_["language_index"]
+        self.font_index = dict_["font_index"]
+        self.font_size = dict_["font_size"]
         self.recent_journal_paths = dict_["recent_journal_paths"]
 
     @staticmethod
     def create_from_dict(dict_) -> TrackerObject:
-        settigns = Settigns()
-        settigns.journal_path = dict_["journal_path"]
-        settigns.language = dict_["language"]
-        settigns.recent_journal_paths = dict_["recent_journal_paths"]
-        return settigns
+        settings = Settings()
+        settings.journal_path = dict_["journal_path"]
+        settings.language_index = dict_["language_index"]
+        settings.font_index = dict_["font_index"]
+        settings.font_size = dict_["font_size"]
+        settings.recent_journal_paths = dict_["recent_journal_paths"]
+        return settings
 
     @staticmethod
-    def get_from_file(path: os.path) -> 'Settigns':
-        settigns = Settigns()
-        settigns.load(path)
+    def get_from_file(path: os.path) -> 'Settings':
+        settings = Settings()
+        settings.load(path)
 
-        return settigns
+        return settings
 
     @staticmethod
-    def generate_default_settings() -> 'Settigns':
-        settings = Settigns()
-        settings.journal_path = Settigns.DEFAULT_JOURNAL_PATH
-        settings.language = Settigns.DEFAULT_LANGUAGE
+    def generate_default_settings() -> 'Settings':
+        settings = Settings()
+        settings.journal_path = Settings.DEFAULT_JOURNAL_PATH
+        settings.language_index = Settings.DEFAULT_LANGUAGE_INDEX
+        settings.font_index = Settings.DEFAULT_FONT_INDEX
+        settings.font_size = Settings.DEFAULT_FONT_SIZE
         settings.recent_journal_paths = []
 
         return settings
