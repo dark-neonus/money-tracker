@@ -1,5 +1,23 @@
 import tkinter as tk
 
+"""
+
+             .         .
+             |\       /|
+             |#\_____/#|
+             |  _   _  |
+             | |O| |O| |
+             | |_| |_| |
+             |_       _|
+            _|\V\___/V/|_
+         __| | \VVVVV/ | |__
+        / ___|         |__  \
+        |_/      ___      \_|
+          |_____|   |_____|
+
+    Hello from Chupakabreniatko! :)
+    
+"""
 
 class GUIElement:
     def __init__(

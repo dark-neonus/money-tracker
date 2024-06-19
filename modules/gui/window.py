@@ -4,6 +4,7 @@ if __name__ == "__main__":
 
     sys.path[0] = os.path.join(sys.path[0], "..", "..")
 
+from modules.tracker_logic.classes import Settings
 from modules.gui.basic_elements import GUIFrame, GUIButton
 from modules.gui.label_and_entry import GUILabelAndEntry
 from modules.gui.listbox import GUIListBox
@@ -14,7 +15,7 @@ from modules.tracker_logic.fonts import FONTS
 from typing import Dict
 
 from datetime import date
-import datetime
+from modules.tracker_logic.languages import load_full_language_pack, extract_text_set_from_language_pack
 
 import tkinter as tk
 from tkinter import ttk, font
@@ -60,7 +61,9 @@ def create_window(title: str, width: int, height: int, min_width: int = None, mi
 
 
 class GUI:
-    def __init__(self, font_index : int, font_size : int) -> None:
+    def __init__(self, font_index : int, font_size : int, settings : Settings) -> None:
+
+        self.settings = settings
 
         # Root init
         self.root = tk.Tk()
@@ -86,6 +89,8 @@ class GUI:
 
         self.root.minsize(width=800, height=600)
         
+        self.lang_pack = load_full_language_pack()
+        self.Text = extract_text_set_from_language_pack(self.settings.language_index, self.lang_pack)
 
         # Notebook creation
         self.notebook = ttk.Notebook(self.root)
@@ -122,7 +127,7 @@ class GUI:
     def f_add_transaction_button(self) -> None:
 
         new_window = create_window(
-            "Create transaction",
+            self.Text["Create transaction"],
             700,
             500,
             min_width=700,
@@ -136,20 +141,20 @@ class GUI:
         window_frame = GUIFrame(window_fr, side="top",
                                 expand=True, fill="both")
 
-        info_name = GUILabelAndEntry("Name", edible=True)
+        info_name = GUILabelAndEntry(self.Text["Name"], edible=True)
         info_name.side = "top"
         info_name.entry_side = "left"
 
         info_description = GUILabelAndEntry(
-            "Description", edible=True, row_count=3)
+            self.Text["Description"], edible=True, row_count=3)
         info_description.side = "top"
         info_description.entry_side = "left"
 
-        info_balance = GUILabelAndEntry("Balance", edible=True, only_numbers=True, default_text="0.0")
+        info_balance = GUILabelAndEntry(self.Text["Balance"], edible=True, only_numbers=True, default_text="0.0")
         info_balance.side = "top"
         info_balance.entry_side = "left"
 
-        info_date = GUILabelAndEntry("Date(YYYY-MM-DD)", edible=True, default_text=date.today().isoformat())
+        info_date = GUILabelAndEntry(self.Text["Date(YYYY-MM-DD)"], edible=True, default_text=date.today().isoformat())
         info_date.side = "top"
         info_date.entry_side = "left"
 
@@ -161,7 +166,7 @@ class GUI:
         tag_list = {key : value.name for key, value in self.tag_list_holder.items()}
 
         info_tags = GUIListToList(
-            source_dict=tag_list, assets_header="Transaction tags", source_header="Available tags", row_count=6)
+            source_dict=tag_list, assets_header=self.Text["Transaction tags"], source_header=self.Text["Available tags"], row_count=6)
         info_tags.fill = "both"
         info_tags.expand = True
         info_tags.relief = "flat"
@@ -172,7 +177,7 @@ class GUI:
                 try:
                     transaction_date = date.fromisoformat(info_date.entry.get("1.0", "end-1c"))
                 except:
-                    messagebox.showerror("Error", "Invalid date!", parent=new_window)
+                    messagebox.showerror(self.Text["Error"], self.Text["Invalid date!"], parent=new_window)
                     return
 
                 try:
@@ -189,14 +194,14 @@ class GUI:
                 )
                 new_window.destroy()
             else:
-                messagebox.showinfo("Error", "Please enter name", parent=new_window)
+                messagebox.showinfo(self.Text["Error"], self.Text["Please enter name"], parent=new_window)
 
         window_frame.add(info_tags)
 
         buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
 
-        create_button = GUIButton("Create", function=tmp_f)
-        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+        create_button = GUIButton(self.Text["Create"], function=tmp_f)
+        cancel_button = GUIButton(self.Text["Cancel"], function=new_window.destroy)
 
         buttons_frame.add(cancel_button)
         buttons_frame.add(create_button)
@@ -209,11 +214,12 @@ class GUI:
         current_transaction : Transaction = self.fv_get_current_transaction()
 
         if current_transaction == None:
-            messagebox.showinfo("Error", "Please select transaction first", parent=self.root)
+            messagebox.showinfo(self.Text["Error"], self.Text["Please select transaction first!"], parent=self.root)
             return
         
+        tmp_name = self.Text["Edit transaction"]
         new_window = create_window(
-            f"Edit transaction {current_transaction.id}",
+            f"{tmp_name} {current_transaction.id}",
             700,
             500,
             min_width=700,
@@ -228,7 +234,7 @@ class GUI:
                                 expand=True, fill="both")
 
         info_name = GUILabelAndEntry(
-            label_text="Name",
+            label_text=self.Text["Name"],
             edible=True,
             default_text=current_transaction.name
             )
@@ -236,7 +242,7 @@ class GUI:
         info_name.entry_side = "left"
 
         info_description = GUILabelAndEntry(
-            "Description",
+            self.Text["Description"],
             edible=True,
             default_text=current_transaction.description,
             row_count=3
@@ -245,7 +251,7 @@ class GUI:
         info_description.entry_side = "left"
 
         info_balance = GUILabelAndEntry(
-            "Balance",
+            self.Text["Balance"],
             edible=True,
             only_numbers=True,
             default_text=current_transaction.balance
@@ -253,7 +259,7 @@ class GUI:
         info_balance.side = "top"
         info_balance.entry_side = "left"
 
-        info_date = GUILabelAndEntry("Date(YYYY-MM-DD)", edible=True, default_text=current_transaction.date.isoformat())
+        info_date = GUILabelAndEntry(self.Text["Date(YYYY-MM-DD)"], edible=True, default_text=current_transaction.date.isoformat())
         info_date.side = "top"
         info_date.entry_side = "left"
 
@@ -274,8 +280,8 @@ class GUI:
         info_tags = GUIListToList(
             source_dict=available_tags,
             asset_dict=current_tags,
-            assets_header="Transaction tags",
-            source_header="Available tags",
+            assets_header=self.Text["Transaction tags"],
+            source_header=self.Text["Available tags"],
             row_count=6
             )
         info_tags.fill = "both"
@@ -288,7 +294,7 @@ class GUI:
                 try:
                     transaction_date = date.fromisoformat(info_date.entry.get("1.0", "end-1c"))
                 except:
-                    messagebox.showerror("Error", "Invalid date!", parent=new_window)
+                    messagebox.showerror(self.Text["Error"], self.Text["Invalid date!"], parent=new_window)
                     return
 
                 try:
@@ -306,14 +312,14 @@ class GUI:
                 )
                 new_window.destroy()
             else:
-                messagebox.showinfo("Error", "Please enter name", parent=new_window)
+                messagebox.showinfo(self.Text["Error"], self.Text["Please enter name"], parent=new_window)
 
         window_frame.add(info_tags)
 
         buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
 
-        create_button = GUIButton("Save", function=tmp_f)
-        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+        create_button = GUIButton(self.Text["Save"], function=tmp_f)
+        cancel_button = GUIButton(self.Text["Cancel"], function=new_window.destroy)
 
         buttons_frame.add(cancel_button)
         buttons_frame.add(create_button)
@@ -326,10 +332,10 @@ class GUI:
 
         selected_index = self.transaction_listbox.listbox.curselection()
         if not selected_index:
-            messagebox.showinfo("Error", "Please select transaction first", parent=self.root)
+            messagebox.showinfo(self.Text["Error"], self.Text["Please select transaction first!"], parent=self.root)
             return
         
-        want_to_delete = messagebox.askyesno("Are you sure?", "Do you realy want to delete selected transaction?", parent=self.root)
+        want_to_delete = messagebox.askyesno(self.Text["Are you sure?"], self.Text["Do you realy want to delete selected this transaction?"], parent=self.root)
         
         if want_to_delete:
             self.fv_delete_selected_transaction()

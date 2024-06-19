@@ -1,11 +1,16 @@
-from modules.tracker_logic.classes import *
 import os
 import sys
+
+from modules.tracker_logic.classes import *
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
+from datetime import datetime
 
 from modules.tracker_logic.languages import load_full_language_pack, extract_text_set_from_language_pack, LANGUAGE_NAMES, LANGUAGE_IDS
 from modules.tracker_logic.fonts import FONTS
+from modules.tracker_logic.classes import Journal
+
+
 
 def empty_function() -> None:
     raise NotImplementedError()
@@ -26,24 +31,33 @@ class GUITopMenu:
         # ----- |> [File menu]
         self.file_menu = tk.Menu(self.menu_bar, tearoff=0)
         # ----- | ----- (New Journal)
-        self.file_menu.add_command(label=self.Text["New Journal"], command=empty_function)
+        self.file_menu.add_command(label=self.Text["New Journal"], command=self.create_journal)
         # ----- | ----- (Open Journal)
-        self.file_menu.add_command(label=self.Text["Open Journal"], command=empty_function)
+        self.file_menu.add_command(label=self.Text["Open Journal"], command=self.open_journal_with_filewindow)
         # ----- | ----- |> [Recent Journals]
         self.recent_journals_menu = tk.Menu(self.file_menu, tearoff=0)
         # ----- | ----- | ----- | (path/to/recent/journal1.json)
         # ----- | ----- | ----- | (path/to/recent/journal2.json)
         # ----- | ----- | ----- | (path/to/recent/journal3.json)
-        for i in range(len(self.settings.recent_journal_paths)):
-            command_params = {
-                'label': os.path.basename(self.settings.recent_journal_paths[i]),
-                'command': empty_function,
-            }
+        rec_j_iter = 0
+        while rec_j_iter < len(self.settings.recent_journal_paths):
+            if self.can_open_journal(self.settings.recent_journal_paths[rec_j_iter]):
 
-            if self.settings.recent_journal_paths[i] == self.settings.journal_path:
-                command_params['background'] = 'orange'
+                command_params = {
+                    'label': os.path.basename(self.settings.recent_journal_paths[rec_j_iter]),
+                    'command': lambda path=self.settings.recent_journal_paths[rec_j_iter]: self.open_journal(path=path),
+                }
 
-            self.recent_journals_menu.add_command(**command_params)
+                if self.settings.recent_journal_paths[rec_j_iter] == self.settings.journal_path:
+                    command_params['background'] = 'orange'
+                
+                self.recent_journals_menu.add_command(**command_params)
+                rec_j_iter += 1
+            else:
+                self.settings.recent_journal_paths.remove(self.settings.recent_journal_paths[rec_j_iter])
+                self.settings.save(Settings.DEFAULT_SETTINGS_PATH)
+        del rec_j_iter
+        
         self.file_menu.add_cascade(label=self.Text["Recent Journals"], menu=self.recent_journals_menu)
         # ----- | ----- (_____________)
         self.file_menu.add_separator()
@@ -142,3 +156,66 @@ class GUITopMenu:
     def __restart_app(self) -> None:
         os.execv(sys.executable, ['python'] + sys.argv)
 
+    def create_journal(self) -> None:
+        file_path = filedialog.asksaveasfilename(
+            initialdir=os.path.join(sys.path[0], Settings.DEFAULT_JOURNALS_PATH),
+            defaultextension=".json", 
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            title="Create Journal"
+        )
+        
+        if file_path:
+            file_name, _ = os.path.splitext(os.path.basename(file_path))
+
+            new_journal = Journal(
+                name=file_name,
+                description="Journal created on " + datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+                id=Journal.generate_journal_id(),
+                tag_list=TagList([]),
+                transaction_list=[]
+            )
+
+            self.settings.journal_path = file_path
+            self.settings.save(Settings.DEFAULT_SETTINGS_PATH)
+
+            new_journal.save(file_path)
+
+            self.__restart_app()
+
+            # self.fv_load_journal(file_path, create_if_not_exist=False)
+
+    def open_journal_with_filewindow(self) -> None:
+        print(os.path.join(sys.path[0], Settings.DEFAULT_JOURNALS_PATH))
+        file_path = filedialog.askopenfilename(
+            initialdir=os.path.join(sys.path[0], Settings.DEFAULT_JOURNALS_PATH),
+            defaultextension=".json", 
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            title="Open Journal"
+        )
+        
+        if file_path:
+            if not os.path.exists(file_path):
+                messagebox.showerror(self.Text["Error"], self.Text["File not found!"], parent=self.root)
+                return
+            
+            self.open_journal(file_path)
+
+    def open_journal(self, path : os.path) -> None:
+        if self.can_open_journal(path):
+            self.settings.journal_path = path
+            self.settings.save(Settings.DEFAULT_SETTINGS_PATH)
+
+            self.__restart_app()
+        else:
+            messagebox.showerror(self.Text["Error"], self.Text["Something went wrong. Could not load journal."], parent=self.root)
+
+    def can_open_journal(self, path : os.path) -> bool:
+        if not os.path.exists(path):
+            return False
+        
+        try:
+            test_journal = Journal.get_from_file(path)
+        except:
+            return False
+
+        return True

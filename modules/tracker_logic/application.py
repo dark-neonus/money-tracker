@@ -35,11 +35,11 @@ class Application:
     def init_app(self) -> None:
 
         # Check if journals folder exists (it will automatically create data folder if needed)
-        if not os.path.exists(Settings.JOURNALS_PATH):
-            os.mkdir(Settings.JOURNALS_PATH)
+        if not os.path.exists(Settings.DEFAULT_JOURNALS_PATH):
+            os.mkdir(Settings.DEFAULT_JOURNALS_PATH)
         
         self.load_settings(
-            path=Settings.SETTINGS_PATH,
+            path=Settings.DEFAULT_SETTINGS_PATH,
             create_if_not_exist=True
         )
 
@@ -53,7 +53,7 @@ class Application:
             create_if_not_exist=True
         )
 
-        self.gui = GUI(self.settings.font_index, self.settings.font_size)
+        self.gui = GUI(self.settings.font_index, self.settings.font_size, self.settings)
         self.init_gui()
 
     def init_gui(self) -> None:

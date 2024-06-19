@@ -4,7 +4,7 @@ from modules.tracker_logic.classes import Settings
 
 import os
 
-LANGUAGE_JSON_PATH = os.path.join(Settings.DATA_PATH, "language.json") 
+LANGUAGE_JSON_PATH = os.path.join(Settings.DEFAULT_DATA_PATH, "language.json") 
 
 EN_INDEX = 0
 UA_INDEX = 1
@@ -65,6 +65,69 @@ __TEXT_SET = [
 
     {EN_ID: "In order for the font size change to take effect, you need to reload the application. Do you want to reload application now?",
      UA_ID: "Щоб змінити розмір шрифту, потрібно перезавантажити додаток. Ви хочете перезавантажити додаток зараз?"},
+
+    {EN_ID: "Error",
+     UA_ID: "Помилка"},
+
+    {EN_ID: "File not found!",
+     UA_ID: "Файл не знайдено!"},
+
+    {EN_ID: "Something went wrong. Could not load journal.",
+     UA_ID: "Щось пішло не так. Не вдалося завантажити журнал."},
+
+    {EN_ID: "Invalid date!",
+     UA_ID: "Некоректна дата!"},
+
+    {EN_ID: "Please enter name!",
+     UA_ID: "Будь ласка, введіть назву!"},
+
+    {EN_ID: "Please select transaction first!",
+     UA_ID: "Будь ласка, виберіть транзакцію!"},
+
+    {EN_ID: "Are you sure?",
+     UA_ID: "Ви впевнені?"},
+
+    {EN_ID: "Do you realy want to delete selected this transaction?",
+     UA_ID: "Ви дійсно хочете видалити вибрану транзакцію?"},
+
+    # _____________Window content_____________
+    {EN_ID: "Create transaction",
+     UA_ID: "Створити транзакцію"},
+
+    {EN_ID: "Edit transaction",
+     UA_ID: "Редагувати транзакцію"},
+
+    {EN_ID: "Name",
+     UA_ID: "Назва"},
+
+    {EN_ID: "Description",
+     UA_ID: "Опис"},
+
+    {EN_ID: "Balance",
+     UA_ID: "Баланс"},
+
+    {EN_ID: "Date(YYYY-MM-DD)",
+     UA_ID: "Дата(YYYY-MM-DD)"},
+
+    {EN_ID: "Transaction tags",
+     UA_ID: "Теги транзакції"},
+
+    {EN_ID: "Available tags",
+     UA_ID: "Доступні теги"},
+
+    {EN_ID: "Create",
+     UA_ID: "Створити"},
+
+    {EN_ID: "Save",
+     UA_ID: "Зберегти"},
+
+    {EN_ID: "Edit",
+     UA_ID: "Редагувати"},
+
+    {EN_ID: "Cancel",
+     UA_ID: "Скасувати"},
+
+    
 ]
 def __get_test_set_for_saving(text_set : list[dict[str, str]]) -> dict[str, dict[str, str]]:
     processed_text_set = {}

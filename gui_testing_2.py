@@ -1,100 +1,78 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import filedialog, Menu
+import json
+import os
+from datetime import datetime
 
-def on_new():
-    messagebox.showinfo("New", "New File")
 
-def on_open():
-    messagebox.showinfo("Open", "Open File")
+def write_to_file(path: os.path, content) -> None:
+    with open(path, "w") as file:
+        json.dump(content, file, indent="\t")
 
-def on_save():
-    messagebox.showinfo("Save", "Save File")
+def create_journal():
+    file_path = filedialog.asksaveasfilename(
+        defaultextension=".json", 
+        filetypes=[("JSON files", "*.json")],
+        title="Create Journal"
+    )
+    
+    if file_path:
+        if not file_path.endswith(".json"):
+            file_path += ".json"
 
-def on_exit():
-    root.quit()
+        file_name_with_extension = os.path.basename(file_path)
+        file_name, _ = os.path.splitext(file_name_with_extension)
+        
+        journal_content = {
+            "title": file_name,
+            "description": "Journal created on " + datetime.now().strftime("%d.%m.%Y %H:%M:%S"),
+            "entries": []
+        }
+        
+        write_to_file(file_path, journal_content)
+        
+        print(f"Journal '{file_name}' created at {file_path}")
 
-def on_cut():
-    messagebox.showinfo("Cut", "Cut")
+def open_journal():
+    file_path = filedialog.askopenfilename(
+        defaultextension=".json", 
+        filetypes=[("JSON files", "*.json")],
+        title="Open Journal"
+    )
+    
+    if file_path:
+        with open(file_path, 'r') as file:
+            journal_content = json.load(file)
+        
+        print(f"Journal loaded from {file_path}")
+        print("Journal content:", json.dumps(journal_content, indent=4))
 
-def on_copy():
-    messagebox.showinfo("Copy", "Copy")
+        # You can also display the content in a Tkinter widget
+        # Here is an example of displaying it in a Text widget
+        text_widget.delete('1.0', tk.END)  # Clear previous content
+        text_widget.insert(tk.END, json.dumps(journal_content, indent=4))
 
-def on_paste():
-    messagebox.showinfo("Paste", "Paste")
-
-def on_preferences():
-    messagebox.showinfo("Preferences", "Preferences")
-
-def on_help():
-    messagebox.showinfo("Help", "Help")
-
-def on_about():
-    messagebox.showinfo("About", "About")
-
-def on_recent_files(file):
-    messagebox.showinfo("Recent File", f"Opening {file}")
-
-def on_tools(tool):
-    messagebox.showinfo("Tool", f"Using {tool}")
-
-# Create the main application window
+# Initialize the Tkinter window
 root = tk.Tk()
-root.title("Tkinter Menu Example with Submenus")
-root.geometry("400x300")
+root.title("Journal App")
 
-# Create the menu bar
-menu_bar = tk.Menu(root)
+# Create a Text widget to display journal content
+text_widget = tk.Text(root, wrap='word', width=80, height=20)
+text_widget.pack(padx=10, pady=10)
 
-# Create the File menu
-file_menu = tk.Menu(menu_bar, tearoff=0)
-file_menu.add_command(label="New", command=on_new)
-file_menu.add_command(label="Open", command=on_open)
-
-# Create a submenu for Recent Files
-recent_files_menu = tk.Menu(file_menu, tearoff=0)
-recent_files_menu.add_command(label="File1.txt", command=lambda: on_recent_files("File1.txt"))
-recent_files_menu.add_command(label="File2.txt", command=lambda: on_recent_files("File2.txt"))
-recent_files_menu.add_command(label="File3.txt", command=lambda: on_recent_files("File3.txt"))
-file_menu.add_cascade(label="Recent Files", menu=recent_files_menu)
-
-file_menu.add_command(label="Save", command=on_save)
-file_menu.add_separator()
-file_menu.add_command(label="Exit", command=on_exit)
-menu_bar.add_cascade(label="File", menu=file_menu)
-
-# Create the Edit menu
-edit_menu = tk.Menu(menu_bar, tearoff=0)
-edit_menu.add_command(label="Cut", command=on_cut)
-edit_menu.add_command(label="Copy", command=on_copy)
-edit_menu.add_command(label="Paste", command=on_paste)
-menu_bar.add_cascade(label="Edit", menu=edit_menu)
-
-# Create the Preferences menu
-preferences_menu = tk.Menu(menu_bar, tearoff=0)
-preferences_menu.add_command(label="Preferences", command=on_preferences)
-
-# Create a submenu for Tools
-tools_menu = tk.Menu(preferences_menu, tearoff=0)
-tools_menu.add_command(label="Tool1", command=lambda: on_tools("Tool1"))
-tools_menu.add_command(label="Tool2", command=lambda: on_tools("Tool2"))
-tools_menu.add_command(label="Tool3", command=lambda: on_tools("Tool3"))
-preferences_menu.add_cascade(label="Tools", menu=tools_menu)
-
-menu_bar.add_cascade(label="Preferences", menu=preferences_menu)
-
-# Create the View menu
-view_menu = tk.Menu(menu_bar, tearoff=0)
-# You can add more commands or options to the View menu here
-menu_bar.add_cascade(label="View", menu=view_menu)
-
-# Create the Help menu
-help_menu = tk.Menu(menu_bar, tearoff=0)
-help_menu.add_command(label="Help", command=on_help)
-help_menu.add_command(label="About", command=on_about)
-menu_bar.add_cascade(label="Help", menu=help_menu)
-
-# Configure the menu bar
+# Create a menu bar
+menu_bar = Menu(root)
 root.config(menu=menu_bar)
 
-# Run the main event loop
+# Create a 'File' menu
+file_menu = Menu(menu_bar, tearoff=0)
+menu_bar.add_cascade(label="File", menu=file_menu)
+
+# Add 'Create Journal' option to the 'File' menu
+file_menu.add_command(label="Create Journal", command=create_journal)
+
+# Add 'Open Journal' option to the 'File' menu
+file_menu.add_command(label="Open Journal", command=open_journal)
+
+# Run the Tkinter event loop
 root.mainloop()

@@ -2,6 +2,7 @@ from typing import List, Dict
 import os
 import abc
 from datetime import date
+import random
 
 from modules.tracker_logic.general_functions import write_to_file, read_from_file
 
@@ -368,15 +369,19 @@ class Journal(TrackerObject):
             
         return new_id
 
+    @staticmethod
+    def generate_journal_id() -> str:
+        index = str(random.randint(0, 10**8)).zfill(10)
+        new_id = f"#jr{index}"
+        return new_id
 
 class Settings(TrackerObject):
-    DATA_PATH = "data"
-    JOURNALS_PATH = os.path.join(DATA_PATH, "journals")
-    SETTINGS_PATH = os.path.join(DATA_PATH, "settings.json")
+    DEFAULT_DATA_PATH = "data"
+    DEFAULT_JOURNALS_PATH = os.path.join(DEFAULT_DATA_PATH, "journals")
+    DEFAULT_SETTINGS_PATH = os.path.join(DEFAULT_DATA_PATH, "settings.json")
 
     DEFAULT_JOURNAL_NAME = "journal_01"
-    DEFAULT_JOURNAL_PATH = os.path.join(
-    JOURNALS_PATH, f"{DEFAULT_JOURNAL_NAME}.json")
+    DEFAULT_JOURNAL_PATH = os.path.join(DEFAULT_JOURNALS_PATH, f"{DEFAULT_JOURNAL_NAME}.json")
 
     DEFAULT_LANGUAGE_INDEX = 0
     DEFAULT_FONT_INDEX = 0
@@ -394,7 +399,7 @@ class Settings(TrackerObject):
 
         def wrapper(self, *args, **kwargs) -> None:
             func(self, *args, **kwargs)
-            self.save(self.SETTINGS_PATH)
+            self.save(self.DEFAULT_SETTINGS_PATH)
         return wrapper
 
     @settings_changes
