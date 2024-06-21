@@ -1,5 +1,6 @@
 # Files to ignore
 gui_testing_1.py
+gui_testing_2.py
 gui-tmp-plan.jpg
 
 # Ignore all .json files
