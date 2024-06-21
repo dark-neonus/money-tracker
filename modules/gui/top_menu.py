@@ -25,6 +25,9 @@ class GUITopMenu:
         self.lang_pack = load_full_language_pack()
         self.Text = extract_text_set_from_language_pack(self.settings.language_index, self.lang_pack)
 
+        self.create_structure()
+
+    def create_structure(self) -> None:
         # > [Menu bar]
         self.menu_bar = tk.Menu(self.root, tearoff=0)
 
@@ -118,7 +121,7 @@ class GUITopMenu:
         self.settings_menu.add_cascade(label=self.Text["Font Size"], menu=self.font_size_menu)
         self.menu_bar.add_cascade(label=self.Text["Settings"], menu=self.settings_menu)
 
-        root.config(menu=self.menu_bar)
+        self.root.config(menu=self.menu_bar)
 
     def set_language_index(self, index: int) -> None:
         self.settings.set_language_index(index)
@@ -219,3 +222,5 @@ class GUITopMenu:
             return False
 
         return True
+
+        

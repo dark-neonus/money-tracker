@@ -335,7 +335,7 @@ class GUI:
             messagebox.showinfo(self.Text["Error"], self.Text["Please select transaction first!"], parent=self.root)
             return
         
-        want_to_delete = messagebox.askyesno(self.Text["Are you sure?"], self.Text["Do you realy want to delete selected this transaction?"], parent=self.root)
+        want_to_delete = messagebox.askyesno(self.Text["Are you sure?"], self.Text["Do you realy want to delete selected transaction?"], parent=self.root)
         
         if want_to_delete:
             self.fv_delete_selected_transaction()
@@ -343,7 +343,7 @@ class GUI:
     def f_filter_transaction_button(self) -> None:
 
         new_window = create_window(
-            "Filter transactions",
+            self.Text["Filter transactions"],
             700,
             500,
             min_width=700,
@@ -359,15 +359,15 @@ class GUI:
 
         info_tag_to_look = GUIListBox(
             row_count=10,
-            label_text="Select tag to look for (optional)",
+            label_text=self.Text["Select tag to look for (optional)"],
             vscrollbar=True
             )
         info_tag_to_look.side = "top"
         
 
-        info_date_from = GUILabelAndEntry("Date from <YYYY-MM-DD> (optional)", row_count=1)
+        info_date_from = GUILabelAndEntry(self.Text["Date from <YYYY-MM-DD> (optional)"], row_count=1)
         info_date_from.side = "top"
-        info_date_to = GUILabelAndEntry("Date to <YYYY-MM-DD> (optional)", row_count=1)
+        info_date_to = GUILabelAndEntry(self.Text["Date to <YYYY-MM-DD> (optional)"], row_count=1)
         info_date_to.side = "top"
 
         window_frame.add(info_tag_to_look)
@@ -387,7 +387,7 @@ class GUI:
                 try:
                     date_from = date.fromisoformat(date_from)
                 except:
-                    messagebox.showerror("Error", "Invalid date from!", parent=new_window)
+                    messagebox.showerror("Error", self.Text["Invalid date from!"], parent=new_window)
                     return
             else:
                 date_from = None
@@ -397,7 +397,7 @@ class GUI:
                 try:
                     date_to = date.fromisoformat(date_to)
                 except:
-                    messagebox.showerror("Error", "Invalid date to!", parent=new_window)
+                    messagebox.showerror("Error", self.Text["Invalid date to!"], parent=new_window)
                     return
             else:
                 date_to = None
@@ -411,8 +411,8 @@ class GUI:
 
         buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
 
-        filter_button = GUIButton("Filter", function=tmp_f)
-        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+        filter_button = GUIButton(self.Text["Filter"], function=tmp_f)
+        cancel_button = GUIButton(self.Text["Cancel"], function=new_window.destroy)
 
         buttons_frame.add(cancel_button)
         buttons_frame.add(filter_button)
@@ -436,7 +436,7 @@ class GUI:
 
         self.transaction_listbox = GUIListBox(
             row_count=30,
-            label_text="Transaction History",
+            label_text=self.Text["Transaction History"],
             vscrollbar=True,
             hscrollbar=True
             )
@@ -446,7 +446,7 @@ class GUI:
             self.transaction_list_frame, side="bottom", fill="both", expand=True, relief="flat"
             )
         
-        self.info_final_balance = GUILabelAndEntry("Sum", edible=False, row_width=15)
+        self.info_final_balance = GUILabelAndEntry(self.Text["Sum"], edible=False, row_width=15)
         self.info_final_balance.side = "left"
 
         self.sort_buttons_frame = GUIFrame(self.bottom_panel_frame, side="left", fill="none", expand=True, relief="flat")
@@ -454,9 +454,9 @@ class GUI:
             self.fv_sort_transactions_by_date()
         def sort_balance_f_holder() -> None:
             self.fv_sort_transactions_by_balance()
-        self.sort_date_button = GUIButton("Sort by date", function=sort_date_f_holder)
+        self.sort_date_button = GUIButton(self.Text["Sort by date"], function=sort_date_f_holder)
         self.sort_date_button.side = "top"
-        self.sort_balance_button = GUIButton("Sort by balance", function=sort_balance_f_holder)
+        self.sort_balance_button = GUIButton(self.Text["Sort by balance"], function=sort_balance_f_holder)
         self.sort_balance_button.side = "top"
 
         self.sort_buttons_frame.add(self.sort_date_button)
@@ -466,9 +466,9 @@ class GUI:
 
         def clear_filter_f_holder() -> None:
             self.fv_clear_filter()
-        self.filter_button = GUIButton("Filter", function=self.f_filter_transaction_button)
+        self.filter_button = GUIButton(self.Text["Filter"], function=self.f_filter_transaction_button)
         self.filter_button.side = "top"
-        self.clear_filter_button = GUIButton("Clear filter", function=clear_filter_f_holder)
+        self.clear_filter_button = GUIButton(self.Text["Clear filter"], function=clear_filter_f_holder)
         self.clear_filter_button.side = "top"
 
         self.filter_buttons_frame.add(self.filter_button)
@@ -491,19 +491,19 @@ class GUI:
         self.info_frame = GUIFrame(
             self.info_and_buttons_frame, side="top", expand=True, fill="both", relief="flat")
 
-        self.info_name = GUILabelAndEntry("Name", edible=False)
-        self.info_balance = GUILabelAndEntry("Balance", edible=False)
+        self.info_name = GUILabelAndEntry(self.Text["Name"], edible=False)
+        self.info_balance = GUILabelAndEntry(self.Text["Balance"], edible=False)
         # self.info_balance.relief = "raised"
         self.info_balance.borderwidth = 2
         self.info_description = GUILabelAndEntry(
-            "Description", edible=False, row_count=4)
+            self.Text["Description"], edible=False, row_count=4)
         
-        self.info_date = GUILabelAndEntry("Date(YYYY-MM-DD)", edible=False)
+        self.info_date = GUILabelAndEntry(self.Text["Date(YYYY-MM-DD)"], edible=False)
         
-        self.info_tags = GUIListBox(row_count=3, label_text="Tags")
+        self.info_tags = GUIListBox(row_count=3, label_text=self.Text["Tags"])
         self.info_tags.listbox_width = 20
         
-        self.info_id = GUILabelAndEntry("ID", edible=False)
+        self.info_id = GUILabelAndEntry(self.Text["ID"], edible=False)
 
         self.info_frame.add(self.info_name)
         self.info_frame.add(self.info_balance)
@@ -519,17 +519,17 @@ class GUI:
             self.info_and_buttons_frame, side="bottom", fill="none", padx=30, pady=30, relief="flat")
 
         self.add_transaction_button = GUIButton(
-            "Add", function=self.f_add_transaction_button, color="#9ED689")
+            self.Text["Add"], function=self.f_add_transaction_button, color="#9ED689")
         self.add_transaction_button.width = 10
         self.add_transaction_button.height = 2
         self.add_transaction_button.padx = 2
         self.edit_transaction_button = GUIButton(
-            "Edit", function=self.f_edit_transaction_button)
+            self.Text["Edit"], function=self.f_edit_transaction_button)
         self.edit_transaction_button.width = 10
         self.edit_transaction_button.height = 2
         self.edit_transaction_button.padx = 2
         self.remove_transaction_button = GUIButton(
-            "Remove", function=self.f_remove_transaction_button, color="#DD8D75")
+            self.Text["Remove"], function=self.f_remove_transaction_button, color="#DD8D75")
         self.remove_transaction_button.width = 10
         self.remove_transaction_button.height = 2
         self.remove_transaction_button.padx = 2
@@ -544,12 +544,12 @@ class GUI:
 
         self.main_tab_frame.pack()
 
-        self.notebook.add(self.transaction_tab, text="Transactions")
+        self.notebook.add(self.transaction_tab, text=self.Text["Transactions"])
 
     def f_add_tag_button(self) -> None:
 
         new_window = create_window(
-            title="Create tag",
+            title=self.Text["Create tag"],
             width=300,
             height=300,
             min_width=300,
@@ -563,11 +563,11 @@ class GUI:
         window_frame = GUIFrame(window_fr, side="top",
                                 expand=True, fill="both")
 
-        info_name = GUILabelAndEntry("Name", edible=True)
+        info_name = GUILabelAndEntry(self.Text["Name"], edible=True)
         info_name.side = "top"
         info_name.entry_side = "left"
         info_description = GUILabelAndEntry(
-            "Description", edible=True, row_count=3)
+            self.Text["Description"], edible=True, row_count=3)
         info_description.side = "top"
         info_description.entry_side = "left"
 
@@ -582,12 +582,12 @@ class GUI:
                 )
                 new_window.destroy()
             else:
-                messagebox.showinfo("Error", "Please enter name", parent=new_window)
+                messagebox.showinfo(self.Text["Error"], self.Text["Please enter name!"], parent=new_window)
 
         buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
 
-        create_button = GUIButton("Create", function=tmp_f)
-        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+        create_button = GUIButton(self.Text["Create"], function=tmp_f)
+        cancel_button = GUIButton(self.Text["Cancel"], function=new_window.destroy)
 
         buttons_frame.add(cancel_button)
         buttons_frame.add(create_button)
@@ -601,11 +601,11 @@ class GUI:
         current_tag = self.fv_get_current_tag()
 
         if current_tag == None:
-            messagebox.showinfo("Error", "Please select tag first", parent=self.root)
+            messagebox.showinfo(self.Text["Error"], self.Text["Please select tag first!"], parent=self.root)
             return
 
         new_window = create_window(
-            title="Edit tag",
+            title=self.Text["Edit tag"],
             width=300,
             height=300,
             min_width=300,
@@ -619,11 +619,11 @@ class GUI:
         window_frame = GUIFrame(window_fr, side="top",
                                 expand=True, fill="both")
 
-        info_name = GUILabelAndEntry("Name", edible=True, default_text=current_tag.name)
+        info_name = GUILabelAndEntry(self.Text["Name"], edible=True, default_text=current_tag.name)
         info_name.side = "top"
         info_name.entry_side = "left"
         info_description = GUILabelAndEntry(
-            "Description",
+            self.Text["Description"],
             edible=True,
             row_count=3,
             default_text=current_tag.description
@@ -643,12 +643,12 @@ class GUI:
                 )
                 new_window.destroy()
             else:
-                messagebox.showinfo("Error", "Please enter name", parent=new_window)
+                messagebox.showinfo(self.Text["Error"], self.Text["Please enter name!"], parent=new_window)
 
         buttons_frame = GUIFrame(window_frame, "bottom", relief="flat")
 
-        create_button = GUIButton("Create", function=tmp_f)
-        cancel_button = GUIButton("Cancel", function=new_window.destroy)
+        create_button = GUIButton(self.Text["Create"], function=tmp_f)
+        cancel_button = GUIButton(self.Text["Cancel"], function=new_window.destroy)
 
         buttons_frame.add(cancel_button)
         buttons_frame.add(create_button)
@@ -661,10 +661,10 @@ class GUI:
 
         selected_index = self.tags_listbox.listbox.curselection()
         if not selected_index:
-            messagebox.showinfo("Error", "Please select tag first", parent=self.root)
+            messagebox.showinfo(self.Text["Error"], self.Text["Please select tag first!"], parent=self.root)
             return
         
-        want_to_delete = messagebox.askyesno("Are you sure?", "Do you realy want to delete selected tag?", parent=self.root)
+        want_to_delete = messagebox.askyesno(self.Text["Are you sure?"], self.Text["Do you realy want to delete selected tag?"], parent=self.root)
         
         if want_to_delete:
             self.fv_delete_selected_tag()
@@ -679,7 +679,7 @@ class GUI:
         self.tag_list_frame = GUIFrame(
             self.tag_tab_frame.frame, side="left", fill="both")
 
-        self.tags_listbox = GUIListBox(30, "Tag list")
+        self.tags_listbox = GUIListBox(30, self.Text["Tag list"])
         self.tag_list_frame.add(self.tags_listbox)
 
         self.tag_tab_frame.add(self.tag_list_frame)
@@ -692,10 +692,10 @@ class GUI:
         self.tag_info_frame = GUIFrame(
             self.tag_info_and_buttons_frame, side="top", expand=True, fill="both", relief="flat")
 
-        self.tag_info_name = GUILabelAndEntry("Name", edible=False)
+        self.tag_info_name = GUILabelAndEntry(self.Text["Name"], edible=False)
         self.tag_info_description = GUILabelAndEntry(
-            "Description", edible=False, row_count=3)
-        self.tag_info_id = GUILabelAndEntry("ID", edible=False)
+            self.Text["Description"], edible=False, row_count=3)
+        self.tag_info_id = GUILabelAndEntry(self.Text["ID"], edible=False)
 
         self.tag_info_frame.add(self.tag_info_name)
         self.tag_info_frame.add(self.tag_info_description)
@@ -708,17 +708,17 @@ class GUI:
             self.tag_info_and_buttons_frame, side="bottom", fill="none", padx=30, pady=30, relief="flat")
 
         self.add_tag_button = GUIButton(
-            "Add", function=self.f_add_tag_button, color="#9ED689")
+            self.Text["Add"], function=self.f_add_tag_button, color="#9ED689")
         self.add_tag_button.width = 10
         self.add_tag_button.height = 2
         self.add_tag_button.padx = 2
         self.edit_tag_button = GUIButton(
-            "Edit", function=self.f_edit_tag_button)
+            self.Text["Edit"], function=self.f_edit_tag_button)
         self.edit_tag_button.width = 10
         self.edit_tag_button.height = 2
         self.edit_tag_button.padx = 2
         self.remove_tag_button = GUIButton(
-            "Remove", function=self.f_remove_tag_button, color="#DD8D75")
+            self.Text["Remove"], function=self.f_remove_tag_button, color="#DD8D75")
         self.remove_tag_button.width = 10
         self.remove_tag_button.height = 2
         self.remove_tag_button.padx = 2
@@ -733,7 +733,7 @@ class GUI:
 
         self.tag_tab_frame.pack()
 
-        self.notebook.add(self.tag_tab, text="Tag")
+        self.notebook.add(self.tag_tab, text=self.Text["Tags tab"])
 
     def add_transaction_to_display(self, transaction: Transaction) -> None:
         

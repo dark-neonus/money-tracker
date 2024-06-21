@@ -14,8 +14,9 @@ from modules.gui.top_menu import GUITopMenu
 
 from modules.tracker_logic.languages import save_text_set, load_full_language_pack, extract_text_set_from_language_pack
 
+from modules.tracker_logic.general_functions import get_file_name
 
-
+from datetime import datetime
     
 
 class Application:
@@ -34,9 +35,11 @@ class Application:
 
     def init_app(self) -> None:
 
-        # Check if journals folder exists (it will automatically create data folder if needed)
         if not os.path.exists(Settings.DEFAULT_JOURNALS_PATH):
             os.mkdir(Settings.DEFAULT_JOURNALS_PATH)
+
+        if not os.path.exists(Settings.DEFAULT_BACKUPS_PATH):
+            os.mkdir(Settings.DEFAULT_BACKUPS_PATH)
         
         self.load_settings(
             path=Settings.DEFAULT_SETTINGS_PATH,
@@ -52,6 +55,8 @@ class Application:
             path=self.settings.journal_path,
             create_if_not_exist=True
         )
+
+        self.create_backup_of_current_journal()
 
         self.gui = GUI(self.settings.font_index, self.settings.font_size, self.settings)
         self.init_gui()
@@ -206,6 +211,8 @@ class Application:
 
         self.filtered_transaction_list = self.journal.transaction_list[:]
 
+        
+
     def index_filtered_to_normal(self, index: int) -> None:
         # Dont do search when not filtered
         if len(self.filtered_transaction_list) == len(self.journal.transaction_list):
@@ -298,10 +305,38 @@ class Application:
         self.load_transaction_list_to_display(self.filtered_transaction_list)
 
     def close_app(self) -> None:
+        self.create_backup_of_current_journal(Settings.DEFAULT_JOURNAL_NAME)
+
         self.gui.root.quit()
+
+    
+    def create_backup_of_current_journal(self, costume_name: str = None) -> None:
+        """
+        Creates a backup of self.journal.
+        Path to it is
+        "./data/backups/{journal_name}/{journal_name[YYYY-mm-DD_HH-MM] or costume_name}.json.backup"
+        """
+        journal_file_name = get_file_name(self.settings.journal_path)
+        journal_backup_dir = os.path.join(Settings.DEFAULT_BACKUPS_PATH, journal_file_name)
+
+        if not os.path.exists(journal_backup_dir):
+            os.mkdir(journal_backup_dir)
+        
+        if not self.__extension_is_backup(self.settings.journal_path):
+            self.journal.create_backup(journal_backup_dir, journal_file_name)
+            self.journal.save(self.settings.journal_path)
+            
+    def __extension_is_backup(self, path: os.path) -> bool:
+        path_parts = path.split(".")
+
+        if len(path_parts) > 1 and path_parts[-1] == Settings.BACKUP_EXTENSION:
+            return True
+
+        return False
 
 if __name__ == "__main__":
     app = Application()
     app.init_app()
     app.run()
+
 

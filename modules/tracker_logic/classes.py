@@ -1,7 +1,7 @@
 from typing import List, Dict
 import os
 import abc
-from datetime import date
+from datetime import date, datetime
 import random
 
 from modules.tracker_logic.general_functions import write_to_file, read_from_file
@@ -264,7 +264,8 @@ class Journal(TrackerObject):
             id: str,
             tag_list: TagList,
             transaction_list: List[Transaction],
-            id_counter: int = 0
+            id_counter: int = 0,
+            backup_path = None
     ) -> None:
 
         TrackerObject.__init__(self, name, description, id)
@@ -276,6 +277,8 @@ class Journal(TrackerObject):
         self.transaction_list: List[Transaction] = []
         for i in range(len(transaction_list)):
             self.add_transaction(transaction_list[i])
+
+        self.backup_path = backup_path
 
     def get_balance(self) -> float:
         bal: float = 0.0
@@ -320,7 +323,8 @@ class Journal(TrackerObject):
             "id": self.id,
             "tag_list": self.tag_list.__dict__(),
             "transaction_list": [transaction.__dict__() for transaction in self.transaction_list],
-            "__id_counter": self.__id_counter
+            "__id_counter": self.__id_counter,
+            "backup_path": self.backup_path
         }
 
     def from_dict(self, dict_) -> None:
@@ -331,6 +335,7 @@ class Journal(TrackerObject):
         self.transaction_list = [Transaction.create_from_dict(tr_dict)
                                  for tr_dict in dict_["transaction_list"]]
         self.__id_counter = dict_["__id_counter"]
+        self.backup_path = dict_["backup_path"]
 
     @staticmethod
     def create_from_dict(dict_: dict) -> 'Journal':
@@ -340,7 +345,8 @@ class Journal(TrackerObject):
             dict_["id"],
             TagList.from_dict(dict_["tag_list"]),
             [],
-            dict_["__id_counter"]
+            dict_["__id_counter"],
+            dict_["backup_path"]
         )
         for tr_dict in dict_["transaction_list"]:
             journal.add_transaction(Transaction.create_from_dict(tr_dict), False) 
@@ -374,14 +380,33 @@ class Journal(TrackerObject):
         index = str(random.randint(0, 10**8)).zfill(10)
         new_id = f"#jr{index}"
         return new_id
+    
+
+    def create_backup(self, backup_dir : os.path, file_name : str) -> None:
+        backup_journal_name = file_name + datetime.now().strftime("[%Y-%m-%d_%H-%M]")
+        if os.path.exists(self.backup_path):
+            os.remove(self.backup_path)
+
+        self.backup_path = os.path.join(backup_dir, backup_journal_name + ".json" + Settings.BACKUP_EXTENSION)
+        write_to_file(
+            self.backup_path,
+            self.__dict__()
+            )
+        
 
 class Settings(TrackerObject):
     DEFAULT_DATA_PATH = "data"
+
     DEFAULT_JOURNALS_PATH = os.path.join(DEFAULT_DATA_PATH, "journals")
+    DEFAULT_BACKUPS_PATH = os.path.join(DEFAULT_DATA_PATH, "backups")
     DEFAULT_SETTINGS_PATH = os.path.join(DEFAULT_DATA_PATH, "settings.json")
 
-    DEFAULT_JOURNAL_NAME = "journal_01"
+    DEFAULT_JOURNAL_NAME = "default_journal"
     DEFAULT_JOURNAL_PATH = os.path.join(DEFAULT_JOURNALS_PATH, f"{DEFAULT_JOURNAL_NAME}.json")
+
+    # ".backup"
+    BACKUP_EXTENSION = ".backup"
+    DEL_EXTENSION = ".del"
 
     DEFAULT_LANGUAGE_INDEX = 0
     DEFAULT_FONT_INDEX = 0

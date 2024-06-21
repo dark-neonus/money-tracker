@@ -78,24 +78,69 @@ __TEXT_SET = [
     {EN_ID: "Invalid date!",
      UA_ID: "Некоректна дата!"},
 
+    {EN_ID: "Invalid date from!",
+     UA_ID: "Некоректна дата від!"},
+
+    {EN_ID: "Invalid date to!",
+     UA_ID: "Некоректна дата до!"},
+
     {EN_ID: "Please enter name!",
      UA_ID: "Будь ласка, введіть назву!"},
 
     {EN_ID: "Please select transaction first!",
      UA_ID: "Будь ласка, виберіть транзакцію!"},
 
+    {EN_ID: "Please select tag first!",
+     UA_ID: "Будь ласка, виберіть тег!"},
+
     {EN_ID: "Are you sure?",
      UA_ID: "Ви впевнені?"},
 
-    {EN_ID: "Do you realy want to delete selected this transaction?",
+    {EN_ID: "Do you realy want to delete selected transaction?",
      UA_ID: "Ви дійсно хочете видалити вибрану транзакцію?"},
 
+    {EN_ID: "Do you realy want to delete selected tag?",
+     UA_ID: "Ви дійсно хочете видалити вибраний тег?"},
+
     # _____________Window content_____________
+    {EN_ID: "Transactions",
+     UA_ID: "Транзакції"},
+
+    {EN_ID: "Create tag",
+     UA_ID: "Створити тег"},
+
+    {EN_ID: "Edit tag",
+     UA_ID: "Редагувати тег"},
+
+    {EN_ID: "Tag list",
+     UA_ID: "Список тегів"},
+
+    {EN_ID: "Tags tab",
+     UA_ID: "Вкладка тегів"},
+
     {EN_ID: "Create transaction",
      UA_ID: "Створити транзакцію"},
 
     {EN_ID: "Edit transaction",
      UA_ID: "Редагувати транзакцію"},
+
+    {EN_ID: "Filter transactions",
+     UA_ID: "Фільтрувати транзакції"},
+
+    {EN_ID: "Select tag to look for (optional)",
+     UA_ID: "Виберіть тег для пошуку (опціонально)"},
+
+    {EN_ID: "Date from <YYYY-MM-DD> (optional)",
+     UA_ID: "Дата від <YYYY-MM-DD> (опціонально)"},
+
+    {EN_ID: "Date to <YYYY-MM-DD> (optional)",
+     UA_ID: "Дата до <YYYY-MM-DD> (опціонально)"},
+
+    {EN_ID: "Transaction History",
+     UA_ID: "Історія транзакцій"},
+
+    {EN_ID: "Sum",
+     UA_ID: "Сума"},
 
     {EN_ID: "Name",
      UA_ID: "Назва"},
@@ -112,6 +157,12 @@ __TEXT_SET = [
     {EN_ID: "Transaction tags",
      UA_ID: "Теги транзакції"},
 
+    {EN_ID: "Tags",
+     UA_ID: "Теги"},
+
+    {EN_ID: "ID",
+     UA_ID: "ID"},
+
     {EN_ID: "Available tags",
      UA_ID: "Доступні теги"},
 
@@ -121,13 +172,29 @@ __TEXT_SET = [
     {EN_ID: "Save",
      UA_ID: "Зберегти"},
 
+    {EN_ID: "Add",
+     UA_ID: "Додати"},
+
     {EN_ID: "Edit",
      UA_ID: "Редагувати"},
+
+    {EN_ID: "Filter",
+     UA_ID: "Фільтрувати"},
+
+    {EN_ID: "Clear filter",
+     UA_ID: "Очистити фільтр"},
+
+    {EN_ID: "Remove",
+     UA_ID: "Видалити"},
 
     {EN_ID: "Cancel",
      UA_ID: "Скасувати"},
 
-    
+    {EN_ID: "Sort by date",
+     UA_ID: "Сортувати за датою"},
+
+    {EN_ID: "Sort by balance",
+     UA_ID: "Сортувати за балансом"},
 ]
 def __get_test_set_for_saving(text_set : list[dict[str, str]]) -> dict[str, dict[str, str]]:
     processed_text_set = {}
