@@ -28,7 +28,7 @@ Run application in one of next way:
         And run script again
     - ### Windows
         ```powershell
-        sh run.sh
+        run.bat
         ```
     ___
 2. ## Manually run `main.py`

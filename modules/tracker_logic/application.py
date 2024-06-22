@@ -36,6 +36,7 @@ class Application:
     def init_app(self) -> None:
 
         if not os.path.exists(Settings.DEFAULT_JOURNALS_PATH):
+            os.mkdir(Settings.DEFAULT_DATA_PATH)
             os.mkdir(Settings.DEFAULT_JOURNALS_PATH)
 
         if not os.path.exists(Settings.DEFAULT_BACKUPS_PATH):
