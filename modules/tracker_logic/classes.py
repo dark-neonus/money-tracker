@@ -384,7 +384,7 @@ class Journal(TrackerObject):
 
     def create_backup(self, backup_dir : os.path, file_name : str) -> None:
         backup_journal_name = file_name + datetime.now().strftime("[%Y-%m-%d_%H-%M]")
-        if self.backup != None and os.path.exists(self.backup_path):
+        if self.backup_path != None and os.path.exists(self.backup_path):
             os.remove(self.backup_path)
 
         self.backup_path = os.path.join(backup_dir, backup_journal_name + ".json" + Settings.BACKUP_EXTENSION)
