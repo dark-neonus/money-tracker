@@ -1,7 +1,7 @@
 # Money tracker app
 ![GUI Preview](assets/imgs/gui_example.png)
 
-# Installation
+# Installation and running
 > Python and git are required to install and run application. Please ensure that they are installed on your computer.
 
 Copy git repository on your computer to desired directory
@@ -16,12 +16,12 @@ cd money-tracker
 ```
 
 Run application in one of next way:
-1. ## Execute script run.sh
+1. ## Execute script `run.sh`
     - ### Linux
         ```shell
         ./run.sh
         ```
-        You may encounter error like `bash: ./run.sh: Permission denied` t  han  you should add permission to execute this script by simple run:
+        You may encounter error like `bash: ./run.sh: Permission denied` than  you should add permission to execute this script by simple run:
         ```shell
         chmod +x ./run.sh
         ```
