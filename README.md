@@ -1,9 +1,10 @@
 # Money tracker app
 ![GUI Preview](assets/imgs/gui_example.png)
 
+___
 # Installation
 ## Requirements
-> **Python and git are required to install and run application. Please ensure that they are installed on your computer.**
+> **`Python` and `Git` are required to install and run application. Please ensure that they are installed on your computer.**
 
 To run application you need tkinter that you can download by simply run
 ```bash
@@ -48,11 +49,19 @@ Run application in one of next way:
     ```shell
     python3 main.py
     ```
+
+$~~~~~~~~~$
+
+$~~~~~~~~~$
+
 ___
 # Updating
 
-___
+$~~~~~~~~~$
 
+$~~~~~~~~~$
+
+___
 # Features
 1. ## Support for multiple Journals
     ![Multy journal support image](assets/imgs/multy_journal_support.png)
@@ -94,17 +103,26 @@ ___
         Example of gui with ukrainina interface | Приклад вигляду програми з українським інтерфейсом
 
 8. ## Backup machanics
-    Each time apps interface is loaded backup of currently opened journal is being created at `.` -> `data` -> `backups` -> `journal_name` directory
+    Each time apps interface is loaded backup of currently opened journal is being created at `data/backups/__journal_name__/` directory
 
+
+$~~~~~~~~~$
+
+$~~~~~~~~~$
 
 ___
 # Troubleshooting
 - ## Cant run app for the first time
     Check if [all required](#requirements) dependies are installed
 - ## The app stopped oppening
-    1. Try to delete settings file `data` -> `settings.json`
+    1. Try to delete settings file `data/settings.json`
     2. Try to [update app](#updating)
     3. Try to [reinstall app](#installation)
+
+$~~~~~~~~~$
+
+$~~~~~~~~~$
+
 ___
 # About project
 I am writting small projects for few years already but i started to notice that my projects doesnt have practical usage and are created just for exercising, learning, interest or aestetic.
