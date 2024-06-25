@@ -24,8 +24,8 @@ Enter application directory
 cd money-tracker
 ```
 
-## Runnings
-Run application in one of next way:
+## Running
+Run application in one of the next ways:
 1. ### Execute script `run.sh`
     - #### Linux
         ```shell
@@ -55,7 +55,7 @@ $~~~~~~~~~$
 $~~~~~~~~~$
 
 ___
-# Updating
+# Update
 
 $~~~~~~~~~$
 
@@ -100,9 +100,9 @@ ___
     2. ### Ukrainian
         ![Exampe of gui with ukrainian interface](assets/imgs/ukrainian_language.png)
 
-        Example of gui with ukrainina interface | Приклад вигляду програми з українським інтерфейсом
+        Example of gui with ukrainian interface | Приклад вигляду програми з українським інтерфейсом
 
-8. ## Backup machanics
+8. ## Backup mechanics
     Each time apps interface is loaded backup of currently opened journal is being created at `data/backups/__journal_name__/` directory
 
 
@@ -112,11 +112,11 @@ $~~~~~~~~~$
 
 ___
 # Troubleshooting
-- ## Cant run app for the first time
-    Check if [all required](#requirements) dependies are installed
+- ## Can't run app for the first time
+    Check if [all required dependies](#requirements) are installed
 - ## The app stopped oppening
     1. Try to delete settings file `data/settings.json`
-    2. Try to [update app](#updating)
+    2. Try to [update app](#update)
     3. Try to [reinstall app](#installation)
 
 $~~~~~~~~~$
@@ -127,7 +127,7 @@ ___
 # About project
 I am writting small projects for few years already but i started to notice that my projects doesnt have practical usage and are created just for exercising, learning, interest or aestetic.
 
-So i decided to change it and create project targeted on solving real problem. I wanted to start from small so just ask my mom if she have any problems that can be solved with simple script or application. She told me that she want to do some money tracking but popular apps are expensive or too feature-full ans she wants something simplier.
+So i decided to change it and create project targeted on solving real problem. I wanted to start from small so just ask my mom if she have any problems that can be solved with simple script or application. She told me that she want to do some money tracking but popular apps are expensive or too feature-full and she wants something simplier.
 
 And after that i wrote this simple app to create journals and transaction to specially meet here needs.
 
